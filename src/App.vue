@@ -14,7 +14,7 @@ import QualifyingResult from './components/QualifyingResult.vue'
   </header>
 
   <main>
-    <QualifyingResult />
+    <QualifyingResult qualifying="Q1" />
   </main>
 </template>
 
