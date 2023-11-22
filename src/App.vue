@@ -1,7 +1,11 @@
-<script setup lang="ts">
+<script setup>
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
+import DropDown from './components/simple/DropDown.vue'
+import { ref } from 'vue'
+
+let category = ref("Q1")
 </script>
 
 <template>
@@ -14,7 +18,8 @@ import QualifyingResult from './components/QualifyingResult.vue'
   </header>
 
   <main>
-    <QualifyingResult qualifying="Q1" />
+    <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
+    <QualifyingResult :qualifying=category />
   </main>
 </template>
 
