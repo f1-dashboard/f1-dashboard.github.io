@@ -33,3 +33,43 @@ a,
     padding: 0 2rem;
   }
 }
+
+.red_bull {
+  fill: #3671c6
+}
+
+.mercedes {
+  fill: #6cd3bf
+}
+
+.ferrari {
+  fill: #f91536
+}
+
+.mclaren {
+  fill: #f58020
+}
+
+.aston_martin {
+  fill: #358c75
+}
+
+.alpine {
+  fill: #2293d1
+}
+
+.williams {
+  fill: #37bedd
+}
+
+.alphatauri {
+  fill: #5e8faa
+}
+
+.alfa {
+  fill: #c92d4b
+}
+
+.haas {
+  fill: #b6babd
+}
