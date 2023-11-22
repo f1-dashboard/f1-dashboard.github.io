@@ -4,7 +4,7 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-
+  font-family: 'formula1';
   font-weight: normal;
 }
 
@@ -32,6 +32,18 @@ a,
     grid-template-columns: 1fr 1fr;
     padding: 0 2rem;
   }
+}
+
+@font-face {
+  font-family: formula1;
+  font-weight: normal;
+  src: url("Formula1-Regular.otf") format("opentype")
+}
+
+@font-face {
+  font-family: formula1;
+  font-weight: bold;
+  src: url("Formula1-Bold.otf") format("opentype")
 }
 
 .red_bull {
