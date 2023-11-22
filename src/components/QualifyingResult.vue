@@ -26,7 +26,8 @@ export default {
     },
 
     async mounted() {
-        this.render(this.qualifying, null)
+        this.init()
+        this.update(null)
     },
     methods: {
         async update(relativeTo) {
@@ -97,10 +98,7 @@ export default {
                     .attr("text-anchor", "end"));
         },
 
-        async render(q, relativeTo) {
-            // https://observablehq.com/@d3/diverging-bar-chart/2?intent=fork
-            const drivers = await this.getDriverData(q, relativeTo)
-
+        async init() {
             // Declare the chart dimensions and margins.
             const barHeight = 25;
             const marginTop = 20;
@@ -110,83 +108,40 @@ export default {
             const width = 640;
             const height = 500;
 
-            const format = d3.format("+.3")
-
             // Declare the x (horizontal position) scale.
-            const x = d3.scaleLinear()
-                .domain(d3.extent(drivers, d => d.delta))
+            this.x = d3.scaleLinear()
                 .rangeRound([marginLeft, width - marginRight]);
 
             // Declare the y (vertical position) scale.
-            const y = d3.scaleBand()
-                .domain(drivers.map(d => d.full_name))
+            this.y = d3.scaleBand()
                 .rangeRound([marginTop, height - marginBottom])
                 .padding(0.1);
 
             // Create the SVG container.
-            const svg = d3.create("svg")
+            this.svg = d3.create("svg")
                 .attr("width", width)
                 .attr("height", height)
                 .attr("viewBox", [0, 0, width, height])
                 .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
 
             // Create the bar for each driver
-            this.bars = svg.append("g")
-                .selectAll()
-                .data(drivers)
-                .join("rect")
-                .attr("class", d => d.team)
-                .attr("x", d => x(Math.min(d.delta, 0)))
-                .attr("y", (d) => y(d.full_name))
-                .attr("width", (d) => Math.abs(x(d.delta) - x(0)))
-                .attr("height", y.bandwidth())
-                .on("click", (d, i) => this.update(i.full_name))
-
-            const eps = 0.0000001
+            this.bars = this.svg.append("g")
 
             // Add the timing label 00:00.000
-            this.timing_labels = svg.append("g")
-                .attr("fill", "white")
-                .selectAll()
-                .data(drivers)
-                .join("text")
-                .attr("text-anchor", d => d.delta > 0 ? "end" : "start")
-                .classed("delta", true)
-                .attr("x", d => x(d.delta))
-                .attr("y", d => y(d.full_name) + y.bandwidth() / 2)
-                .attr("dy", "0.35em")
-                .attr("dx", d => -Math.sign(d.delta) * 4)
-                .text(d => {
-                    if (d.delta < eps && d.delta > -eps) {
-                        return d.time_string
-                    }
-                    return format(d.delta)
-                }
-                )
-                .call(text => text.filter(d => Math.abs(x(d.delta) - x(0)) < 40) // short bars
-                    .attr("dx", d => Math.sign(d.delta + eps) * 4)
-                    .attr("fill", "black")
-                    .attr("text-anchor", d => d.delta < 0 ? "end" : "start"))
+            this.timing_labels = this.svg.append("g")
 
             // Add the x-axis.
-            this.gx = svg.append("g")
+            this.gx = this.svg.append("g")
                 .attr("transform", `translate(0,${height - marginBottom})`)
-                .call(d3.axisBottom(x));
+                .call(d3.axisBottom(this.x));
 
             // Add the y-axis.
-            this.gy = svg.append("g")
-                .attr("transform", `translate(${x(0)},0)`)
-                .call(d3.axisLeft(y).tickSize(0))
-                .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i].delta < 0)
-                    .attr("text-anchor", "start")
-                    .attr("x", 6));
-
-            this.x = x;
-            this.y = y;
-            this.svg = svg;
+            this.gy = this.svg.append("g")
+                .attr("transform", `translate(${this.x(0)},0)`)
+                .call(d3.axisLeft(this.y).tickSize(0));
 
             // Append the SVG element. 
-            container.append(svg.node())
+            container.append(this.svg.node())
         },
 
         async getDriverData(q, relativeTo) {
