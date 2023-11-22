@@ -14,7 +14,7 @@ export default {
     props: ['qualifying'],
     watch: {
         qualifying: function (newVal, oldVal) {
-            this.update(newVal)
+            this.update(null)
             console.log('Prop changed: ', newVal, ' | was: ', oldVal)
         }
     },
@@ -26,36 +26,34 @@ export default {
     },
 
     async mounted() {
-        this.render(this.qualifying)
+        this.render(this.qualifying, null)
     },
     methods: {
-        async update(q) {
-            const drivers = await this.getDriverData(q)
+        async update(relativeTo) {
+            const drivers = await this.getDriverData(this.qualifying, relativeTo)
+            const format = d3.format("+.3")
+            const eps = 0.0000001
 
             console.log(this.x)
             // Update axis domains
-            this.x.domain([0, d3.max(drivers, d => d.delta)])
-            this.y.domain(d3.sort(drivers, d => d.delta).map(d => d.full_name))
-            // this.y.domain(d3.sort(drivers, d => d.delta).filter(d => !d.dnq).map(d => d.full_name))
+            this.x.domain(d3.extent(drivers, d => d.delta))
+            this.y.domain(drivers.map(d => d.full_name))
 
             const t = this.svg.transition().duration(750)
-            // transitions
-            this.gx.transition(t)
-                .call(d3.axisBottom(this.x))
-            this.gy.transition(t)
-                .call(d3.axisLeft(this.y))
 
             let bars = this.svg.selectAll("rect")
                 .data(drivers)
             bars.enter()
                 .append("rect")
+                .on("click", (d, i) => this.update(i.full_name))
                 .merge(bars)
                 .transition(t)
                 .attr("class", d => d.team)
-                .attr("x", this.x(0))
-                .attr("y", (d) => this.y(d.full_name))
-                .attr("width", (d) => this.x(d.delta) - this.x(0))
+                .attr("x", d => this.x(Math.min(d.delta, 0)))
+                .attr("y", d => this.y(d.full_name))
+                .attr("width", d => Math.abs(this.x(d.delta) - this.x(0)))
                 .attr("height", this.y.bandwidth())
+
             bars.exit().remove()
 
             let timing_labels = this.svg.selectAll(".delta")
@@ -64,53 +62,64 @@ export default {
                 .append("text")
                 .merge(timing_labels)
                 .attr("fill", "white")
-                .attr("text-anchor", "end")
                 .classed("delta", true)
                 .transition(t)
+                .attr("text-anchor", d => d.delta > 0 ? "end" : "start")
                 .attr("x", d => this.x(d.delta))
                 .attr("y", d => this.y(d.full_name) + this.y.bandwidth() / 2)
                 .attr("dy", "0.35em")
-                .attr("dx", -4)
+                .attr("dx", d => -Math.sign(d.delta) * 4)
                 .text(d => {
-                    if (d.delta < 0.0000001) {
+                    if (d.delta < eps && d.delta > -eps) {
                         return d.time_string
                     }
-                    return (d.delta < 0 ? "" : "+") + d.delta
+                    return format(d.delta)
                 }
                 )
-                .call(text => text.filter(d => this.x(d.delta) - this.x(0) < 50) // short bars
-                    .attr("dx", +4)
+                .call(text => text.filter(d => Math.abs(this.x(d.delta) - this.x(0)) < 40) // short bars
+                    .attr("dx", d => Math.sign(d.delta + eps) * 4)
                     .attr("fill", "black")
-                    .attr("text-anchor", "start"))
+                    .attr("text-anchor", d => d.delta < 0 ? "end" : "start"))
+
 
             timing_labels.exit().remove()
+
+            // transitions
+            this.gx.transition(t)
+                .call(d3.axisBottom(this.x))
+            this.gy.transition(t)
+                .attr("transform", `translate(${this.x(0)},0)`)
+                .call(d3.axisLeft(this.y).tickSize(0))
+                .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i]?.delta < 0)
+                    .attr("text-anchor", "start")
+                    .attr("x", 6))
+                .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i]?.delta >= 0)
+                    .attr("text-anchor", "end"));
         },
 
-        async render(q) {
-            // Example taken from:
-            // https://observablehq.com/@d3/horizontal-bar-chart/2?intent=fork
-            // Improvements: use relative timings. e.g. delta from first
-            // a cool idea would be to be able to click on someone and see their delta from others (turns into diverging bar chart)
+        async render(q, relativeTo) {
             // https://observablehq.com/@d3/diverging-bar-chart/2?intent=fork
-            const drivers = await this.getDriverData(q)
+            const drivers = await this.getDriverData(q, relativeTo)
 
             // Declare the chart dimensions and margins.
             const barHeight = 25;
             const marginTop = 20;
-            const marginRight = 20;
+            const marginRight = 100;
             const marginBottom = 30;
             const marginLeft = 100;
             const width = 640;
             const height = 500;
 
+            const format = d3.format("+.3")
+
             // Declare the x (horizontal position) scale.
             const x = d3.scaleLinear()
-                .domain([0, d3.max(drivers, d => d.delta)])
-                .range([marginLeft, width - marginRight]);
+                .domain(d3.extent(drivers, d => d.delta))
+                .rangeRound([marginLeft, width - marginRight]);
 
             // Declare the y (vertical position) scale.
             const y = d3.scaleBand()
-                .domain(d3.sort(drivers, d => d.delta).map(d => d.full_name))
+                .domain(drivers.map(d => d.full_name))
                 .rangeRound([marginTop, height - marginBottom])
                 .padding(0.1);
 
@@ -127,34 +136,37 @@ export default {
                 .data(drivers)
                 .join("rect")
                 .attr("class", d => d.team)
-                .attr("x", x(0))
+                .attr("x", d => x(Math.min(d.delta, 0)))
                 .attr("y", (d) => y(d.full_name))
-                .attr("width", (d) => x(d.delta) - x(0))
+                .attr("width", (d) => Math.abs(x(d.delta) - x(0)))
                 .attr("height", y.bandwidth())
+                .on("click", (d, i) => this.update(i.full_name))
+
+            const eps = 0.0000001
 
             // Add the timing label 00:00.000
             this.timing_labels = svg.append("g")
                 .attr("fill", "white")
-                .attr("text-anchor", "end")
                 .selectAll()
                 .data(drivers)
                 .join("text")
+                .attr("text-anchor", d => d.delta > 0 ? "end" : "start")
                 .classed("delta", true)
                 .attr("x", d => x(d.delta))
                 .attr("y", d => y(d.full_name) + y.bandwidth() / 2)
                 .attr("dy", "0.35em")
-                .attr("dx", -4)
+                .attr("dx", d => -Math.sign(d.delta) * 4)
                 .text(d => {
-                    if (d.delta < 0.0000001) {
+                    if (d.delta < eps && d.delta > -eps) {
                         return d.time_string
                     }
-                    return (d.delta < 0 ? "" : "+") + d.delta
+                    return format(d.delta)
                 }
                 )
-                .call(text => text.filter(d => x(d.delta) - x(0) < 50) // short bars
-                    .attr("dx", +4)
+                .call(text => text.filter(d => Math.abs(x(d.delta) - x(0)) < 40) // short bars
+                    .attr("dx", d => Math.sign(d.delta + eps) * 4)
                     .attr("fill", "black")
-                    .attr("text-anchor", "start"))
+                    .attr("text-anchor", d => d.delta < 0 ? "end" : "start"))
 
             // Add the x-axis.
             this.gx = svg.append("g")
@@ -163,22 +175,21 @@ export default {
 
             // Add the y-axis.
             this.gy = svg.append("g")
-                .attr("transform", `translate(${marginLeft},0)`)
-                .call(d3.axisLeft(y));
+                .attr("transform", `translate(${x(0)},0)`)
+                .call(d3.axisLeft(y).tickSize(0))
+                .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i].delta < 0)
+                    .attr("text-anchor", "start")
+                    .attr("x", 6));
 
             this.x = x;
             this.y = y;
             this.svg = svg;
 
             // Append the SVG element. 
-            if (container.childNodes.length > 0) {
-                container.replaceChild(svg.node(), container.childNodes[0]);
-            } else {
-                container.append(svg.node())
-            }
+            container.append(svg.node())
         },
 
-        async getDriverData(q) {
+        async getDriverData(q, relativeTo) {
             const drivers = await d3.csv("./data/monza_qualifying_2023.csv", (d) => {
                 // Parse the duration string, e.g. "0 days 00:01:20.643000"
                 // const durationArray = d.Q1.split(" ");
@@ -216,9 +227,14 @@ export default {
 
             // Choose the fastest time to calculate the delta
             const driversWithTimes = d3.filter(drivers, d => !d.dnq)
-            const relativeTime = d3.min(driversWithTimes, d => d.q1_lap_time)
-            drivers.forEach(d => d.delta = (d.q1_lap_time - relativeTime).toFixed(3))
-            return d3.filter(drivers, d => !d.dnq)
+            let relativeTime;
+            if (relativeTo && d3.filter(drivers, d => d.full_name === relativeTo).length > 0) {
+                relativeTime = d3.filter(drivers, d => d.full_name === relativeTo)[0].q1_lap_time
+            } else {
+                relativeTime = d3.min(driversWithTimes, d => d.q1_lap_time)
+            }
+            drivers.forEach(d => d.delta = (d.q1_lap_time - relativeTime))//.toFixed(3))
+            return d3.sort(d3.filter(drivers, d => !d.dnq), d => d.delta)
         }
     }
 };
