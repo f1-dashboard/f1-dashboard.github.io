@@ -9,8 +9,10 @@
 import * as d3 from "d3";
 import { watch } from "vue";
 
+const qualis = ['Q1', 'Q2', 'Q3']
+
 export default {
-    // TODO: must be one of 'Q1', 'Q2', ...
+    // TODO: must be one of qualis ...
     props: ['qualifying'],
     watch: {
         qualifying: function (newVal, oldVal) {
@@ -18,24 +20,51 @@ export default {
             console.log('Prop changed: ', newVal, ' | was: ', oldVal)
         }
     },
-    data() {
-        return {};
-    },
-    setup(props) {
-        console.log(props.qualifying)
-    },
-
     async mounted() {
+        // Load data
+        const data = d3.csv("./data/monza_qualifying_2023.csv", (d) => {
+            let driver = {
+                full_name: d.FullName,
+                team: d.TeamId
+            };
+
+            for (let q of qualis) {
+                // Parse the duration string, e.g. "0 days 00:01:20.643000"
+                // const durationArray = d.Q1.split(" ");
+                const durationArray = d[q].split(" ");
+
+                try {
+
+                    // Extract days, hours, minutes, seconds, and milliseconds
+                    const days = parseInt(durationArray[0]);
+                    const timeComponents = durationArray[2].split(":");
+                    const hours = parseInt(timeComponents[0]);
+                    const minutes = parseInt(timeComponents[1]);
+                    const secondsArray = timeComponents[2].split(".");
+                    const seconds = parseInt(secondsArray[0]);
+                    const milliseconds = parseInt(secondsArray[1]) / 1000;
+                    driver[q] = {
+                        lap_time: hours * 3600 + minutes * 60 + seconds + milliseconds / 1000,
+                        time_string: `${minutes}:${seconds}.${milliseconds}`,
+                    }
+                } catch {
+                    continue;
+                }
+
+            }
+
+            return driver
+        });
         this.init()
+        this.drivers = await data;
         this.update(null)
     },
     methods: {
         async update(relativeTo) {
-            const drivers = await this.getDriverData(this.qualifying, relativeTo)
+            const drivers = this.getDriverData(this.qualifying, relativeTo)
             const format = d3.format("+.3")
             const eps = 0.0000001
 
-            console.log(this.x)
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))
             this.y.domain(drivers.map(d => d.full_name))
@@ -144,59 +173,18 @@ export default {
             container.append(this.svg.node())
         },
 
-        async getDriverData(q, relativeTo) {
-            const drivers = await d3.csv("./data/monza_qualifying_2023.csv", (d) => {
-                // Parse the duration string, e.g. "0 days 00:01:20.643000"
-                // const durationArray = d.Q1.split(" ");
-                const durationArray = d[q].split(" ");
+        getDriverData(quali, relativeTo) {
+            const driversInQuali = d3.filter(this.drivers, d => d[quali])
 
-                try {
-                    // Extract days, hours, minutes, seconds, and milliseconds
-                    const days = parseInt(durationArray[0]);
-                    const timeComponents = durationArray[2].split(":");
-                    const hours = parseInt(timeComponents[0]);
-                    const minutes = parseInt(timeComponents[1]);
-                    const secondsArray = timeComponents[2].split(".");
-                    const seconds = parseInt(secondsArray[0]);
-                    const milliseconds = parseInt(secondsArray[1]) / 1000;
-                    return {
-                        full_name: d.FullName,
-                        q1_lap_time: hours * 3600 + minutes * 60 + seconds + milliseconds / 1000,
-                        time_string: `${minutes}:${seconds}.${milliseconds}`,
-                        dnq: false,
-                        team: d.TeamId
-                    }
-                } catch {
-                    // Don't include drivers without lap times
-                    return {
-                        full_name: d.FullName,
-                        q1_lap_time: 0,
-                        time_string: `DNQ`,
-                        dnq: true,
-                        team: d.TeamId
-                    }
-                }
-
-            });
-            console.log(drivers)
-
-            // Choose the fastest time to calculate the delta
-            const driversWithTimes = d3.filter(drivers, d => !d.dnq)
             let relativeTime;
-            if (relativeTo && d3.filter(drivers, d => d.full_name === relativeTo).length > 0) {
-                relativeTime = d3.filter(drivers, d => d.full_name === relativeTo)[0].q1_lap_time
+            if (relativeTo && d3.filter(driversInQuali, d => d.full_name === relativeTo).length > 0) {
+                relativeTime = d3.filter(driversInQuali, d => d.full_name === relativeTo)[0][quali].lap_time
             } else {
-                relativeTime = d3.min(driversWithTimes, d => d.q1_lap_time)
+                relativeTime = d3.min(driversInQuali, d => d[quali].lap_time)
             }
-            drivers.forEach(d => d.delta = (d.q1_lap_time - relativeTime))//.toFixed(3))
-            return d3.sort(d3.filter(drivers, d => !d.dnq), d => d.delta)
+            driversInQuali.forEach(d => d.delta = (d[quali].lap_time - relativeTime))
+            return d3.sort(driversInQuali, d => d.delta)
         }
     }
 };
 </script>
-
-<style>
-/* rect {
-    fill: steelblue
-} */
-</style>
