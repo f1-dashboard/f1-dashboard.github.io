@@ -101,7 +101,7 @@ export default {
                 .attr("dx", d => -Math.sign(d.delta) * 4)
                 .text(d => {
                     if (d.delta < eps && d.delta > -eps) {
-                        return d.time_string
+                        return d[this.qualifying].time_string
                     }
                     return format(d.delta)
                 }
