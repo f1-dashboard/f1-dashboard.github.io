@@ -2,6 +2,7 @@
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
+import TrackVisualization from './components/TrackVisualization.vue'
 </script>
 
 <template>
@@ -14,7 +15,8 @@ import QualifyingResult from './components/QualifyingResult.vue'
   </header>
 
   <main>
-    <QualifyingResult qualifying="Q1" />
+    <!-- <QualifyingResult qualifying="Q1" /> -->
+    <TrackVisualization driver="LEC"/>
   </main>
 </template>
 
