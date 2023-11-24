@@ -2,6 +2,7 @@
 import HelloWorld from './components/HelloWorld.vue'
 import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
+import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
 import { ref } from 'vue'
 
@@ -20,6 +21,7 @@ let category = ref("Q1")
   <main>
     <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
     <QualifyingResult :qualifying=category />
+    <TrackVis />
   </main>
 </template>
 
