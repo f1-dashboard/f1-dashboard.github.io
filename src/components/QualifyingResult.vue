@@ -7,13 +7,17 @@
 
 <script>
 import * as d3 from "d3";
-import { watch } from "vue";
 
 const qualis = ['Q1', 'Q2', 'Q3']
 
 export default {
-    // TODO: must be one of qualis ...
-    props: ['qualifying'],
+    props: {
+        qualifying: {
+            validator(value) {
+                return qualis.includes(value)
+            }
+        }
+    },
     watch: {
         qualifying: function (newVal, oldVal) {
             this.update(null)
@@ -21,46 +25,11 @@ export default {
         }
     },
     async mounted() {
-        // Load data
-        const data = d3.csv("./data/monza_qualifying_2023.csv", (d) => {
-            let driver = {
-                full_name: d.FullName,
-                team: d.TeamId
-            };
-
-            for (let q of qualis) {
-                // Parse the duration string, e.g. "0 days 00:01:20.643000"
-                // const durationArray = d.Q1.split(" ");
-                const durationArray = d[q].split(" ");
-
-                try {
-
-                    // Extract days, hours, minutes, seconds, and milliseconds
-                    const days = parseInt(durationArray[0]);
-                    const timeComponents = durationArray[2].split(":");
-                    const hours = parseInt(timeComponents[0]);
-                    const minutes = parseInt(timeComponents[1]);
-                    const secondsArray = timeComponents[2].split(".");
-                    const seconds = parseInt(secondsArray[0]);
-                    const milliseconds = parseInt(secondsArray[1]) / 1000;
-                    driver[q] = {
-                        lap_time: hours * 3600 + minutes * 60 + seconds + milliseconds / 1000,
-                        time_string: `${minutes}:${seconds}.${milliseconds}`,
-                    }
-                } catch {
-                    continue;
-                }
-
-            }
-
-            return driver
-        });
-        this.init()
-        this.drivers = await data;
+        await this.init()
         this.update(null)
     },
     methods: {
-        async update(relativeTo) {
+        update(relativeTo) {
             const drivers = this.getDriverData(this.qualifying, relativeTo)
             const format = d3.format("+.3")
             const eps = 0.0000001
@@ -128,6 +97,40 @@ export default {
         },
 
         async init() {
+            // Load data
+            const data = d3.csv("./data/monza_qualifying_2023.csv", (d) => {
+                let driver = {
+                    full_name: d.FullName,
+                    team: d.TeamId
+                };
+
+                for (let q of qualis) {
+                    // Parse the duration string, e.g. "0 days 00:01:20.643000"
+
+                    try {
+                        const durationArray = d[q].split(" ");
+
+                        // Extract days, hours, minutes, seconds, and milliseconds
+                        const days = parseInt(durationArray[0]);
+                        const timeComponents = durationArray[2].split(":");
+                        const hours = parseInt(timeComponents[0]);
+                        const minutes = parseInt(timeComponents[1]);
+                        const secondsArray = timeComponents[2].split(".");
+                        const seconds = parseInt(secondsArray[0]);
+                        const milliseconds = parseInt(secondsArray[1]) / 1000;
+                        driver[q] = {
+                            lap_time: hours * 3600 + minutes * 60 + seconds + milliseconds / 1000,
+                            time_string: `${minutes}:${seconds}.${milliseconds}`,
+                        }
+                    } catch {
+                        continue;
+                    }
+
+                }
+
+                return driver
+            });
+
             // Declare the chart dimensions and margins.
             const barHeight = 25;
             const marginTop = 20;
@@ -171,6 +174,8 @@ export default {
 
             // Append the SVG element. 
             container.append(this.svg.node())
+
+            this.drivers = await data;
         },
 
         getDriverData(quali, relativeTo) {
