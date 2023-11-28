@@ -1,16 +1,15 @@
-from matplotlib import pyplot as plt
 import fastf1
-import fastf1.plotting
 
-fastf1.plotting.setup_mpl()
-
-session = fastf1.get_session(2019, 'Monza', 'Q')
+session = fastf1.get_session(2019, 'Monza', 'R')
 
 session.load()
 session.results.to_csv("monza_qualifying.csv")
-print(session.event)
+#print(session.event)
 
-# fast_leclerc = session.laps.pick_driver('LEC').pick_fastest()
+leclerc = session.laps.pick_driver('LEC')
+leclerc.to_csv("data/lec_monzaq_laps.csv")
+max = session.laps.pick_driver('VER')
+max.to_csv("data/ver_monzaq_laps.csv")
 # lec_car_data = fast_leclerc.get_car_data()
 # t = lec_car_data['Time']
 # vCar = lec_car_data['Speed']

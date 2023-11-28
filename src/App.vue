@@ -4,6 +4,7 @@ import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
+import TrackPos from './components/TrackPosGraph.vue'
 import { ref } from 'vue'
 
 let category = ref("Q1")
@@ -11,7 +12,7 @@ let category = ref("Q1")
 
 <template>
   <main>
-
+    <TrackPos></TrackPos>
   </main>
 </template>
 
