@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Monza 2019 {{ driver }}</h2>
+        <h2>Track Monza 2019 {{ driver }}</h2>
         <div id="container"></div>
     </div>
 </template>
@@ -56,26 +56,21 @@ export default {
             // svg.append("g")
             //     .call(d3.axisLeft(y));
 
-            // @TODO: Add different line elements to get different colors, see example: 
-            // https://stackoverflow.com/questions/21219557/drawing-different-colored-strokes-between-center-and-different-nodes-in-a-d3-j
+            // define color range
+            var color = d3.scaleLinear()
+                .domain([min_speed, max_speed])
+                .range(["red", "blue"]);
 
-
-            // // add color
-            // var color = d3.scaleLinear()
-            //     .domain([min_speed, max_speed])
-            //     .range(["red", "blue"])
-
-            // Add the line
-            svg.append('path')
-                .datum(telemetry_data)
-                .attr('fill', 'none')
-                .attr('stroke', 'red') // Set the stroke color
-                .attr('stroke-width', 10) 
-                .attr('d', d3.line()
-                    .x(function(d) { return x(d.X); }) // Use the 'x' scale for 'X' coordinates
-                    .y(function(d) { return y(d.Y); }) // Use the 'y' scale for 'Y' coordinates
-                );
-
+            svg.selectAll('line')
+                .data(telemetry_data).enter()
+                .append("svg:line")
+                .attr("x1", function(d) { return x(d.X)})
+                .attr("x2", function(d, i) { return telemetry_data[i+1] ? x(telemetry_data[i+1].X) : x(d.X)})
+                .attr("y1", function(d) { return y(d.Y)})
+                .attr("y2", function(d, i) { return telemetry_data[i+1] ? y(telemetry_data[i+1].Y) : y(d.Y)})
+                .attr("fill", "none")
+                .attr("stroke", function(d) { return color(d.Speed) })
+                .attr("stroke-width", 15)
         },
     }
 };
