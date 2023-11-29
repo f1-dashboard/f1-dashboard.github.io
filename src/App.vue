@@ -4,9 +4,11 @@ import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
+import SpeedVis from './components/SpeedVis.vue'
 import { ref } from 'vue'
 
 let category = ref("Q1")
+let dist = ref(0)
 </script>
 
 <template>
@@ -19,9 +21,11 @@ let category = ref("Q1")
   </header>
 
   <main>
-    <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
+    <!-- <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
     <QualifyingResult :qualifying=category />
-    <TrackVis />
+    <TrackVis /> -->
+    <v-slider :min="0" :max="5500" @update:model-value="(d) => dist = d" />
+    <SpeedVis :point_distance="dist" />
   </main>
 </template>
 
