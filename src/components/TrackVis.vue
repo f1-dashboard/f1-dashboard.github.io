@@ -49,6 +49,8 @@ export default {
                 return { x: parseFloat(d.X), y: parseFloat(d.Y), dist: parseFloat(d.Distance) }
             });
 
+            const telemetry_data = await d3.csv("./data/telemetry_monza.csv")
+
             // Declare the chart dimensions and margins.
             const marginTop = 20;
             const marginRight = 100;
@@ -61,16 +63,14 @@ export default {
             const extent_x = d3.extent(this.data, d => d.x)
             const extent_y = d3.extent(this.data, d => d.y)
 
-            const extent = [Math.min(extent_x[0], extent_y[0]), Math.max(extent_x[1], extent_y[1])]
-
             // Declare the x (horizontal position) scale.
             this.x = d3.scaleLinear()
-                .domain(extent).nice()
+                .domain(extent_x).nice()
                 .range([marginLeft, width - marginRight])
 
             // Declare the y (vertical position) scale.
             this.y = d3.scaleLinear()
-                .domain(extent).nice()
+                .domain(extent_y).nice()
                 .range([height - marginBottom, marginTop])
 
             // track line
@@ -97,16 +97,6 @@ export default {
             const length = (path) => d3.create("svg:path").attr("d", path).node().getTotalLength()
             const l = length(this.track(this.data));
 
-            // Add the x-axis.
-            this.gx = this.svg.append("g")
-                .attr("transform", `translate(0,${height - marginBottom})`)
-                .call(d3.axisBottom(this.x));
-
-            // Add the y-axis.
-            this.gy = this.svg.append("g")
-                .attr("transform", `translate(${marginLeft},0)`)
-                .call(d3.axisLeft(this.y));
-
             this.svg.append("path")
                 .datum(this.data)
                 .attr("fill", "none")
@@ -120,6 +110,23 @@ export default {
                 .duration(500)
                 .ease(d3.easeLinear)
                 .attr("stroke-dasharray", `${l},${l}`);
+
+            // define color range
+            var color = d3.scaleLinear()
+                .domain(d3.extent(this.data, d => d.Speed))
+                .range(["red", "blue"]);
+
+            this.svg.selectAll('line')
+                .data(telemetry_data).enter()
+                .append("svg:line")
+                .attr("x1", function(d) { return this.x(d.x)})
+                .attr("x2", function(d, i) { return telemetry_data[i+1] ? this.x(telemetry_data[i+1].X) : this.x(d.X)})
+                .attr("y1", function(d) { return this.y(d.Y)})
+                .attr("y2", function(d, i) { return telemetry_data[i+1] ? this.y(telemetry_data[i+1].Y) : this.y(d.Y)})
+                .attr("fill", "none")
+                .attr("stroke", function(d) { return color(d.Speed) })
+                .attr("stroke-width", 15)
+
 
             this.circle = this.svg.append("g")
                 .attr("fill", "white")
