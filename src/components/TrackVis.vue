@@ -49,7 +49,11 @@ export default {
                 return { x: parseFloat(d.X), y: parseFloat(d.Y), dist: parseFloat(d.Distance) }
             });
 
-            const telemetry_data = await d3.csv("./data/telemetry_monza.csv")
+            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == "Carlos Sainz")
+        return d})
+
+            const extent_x = d3.extent(this.data, d => d.x)
+            const extent_y = d3.extent(this.data, d => d.y)
 
             // Declare the chart dimensions and margins.
             const marginTop = 20;
@@ -57,11 +61,7 @@ export default {
             const marginBottom = 30;
             const marginLeft = 100;
             const width = 640;
-            // const height = 400;
-            const height = width;
-
-            const extent_x = d3.extent(this.data, d => d.x)
-            const extent_y = d3.extent(this.data, d => d.y)
+            const height = width * (extent_y[1]-extent_y[0]) / (extent_x[1]-extent_x[0]);
 
             // Declare the x (horizontal position) scale.
             this.x = d3.scaleLinear()
@@ -111,21 +111,26 @@ export default {
                 .ease(d3.easeLinear)
                 .attr("stroke-dasharray", `${l},${l}`);
 
+            console.log(d3.extent(telemetry_data, d => +d.Speed))
+            console.log(d3.min(telemetry_data, function(d) { return +d.Speed; }))
+
             // define color range
             var color = d3.scaleLinear()
-                .domain(d3.extent(this.data, d => d.Speed))
+                .domain(d3.extent(telemetry_data, d => +d.Speed))
                 .range(["red", "blue"]);
 
             this.svg.selectAll('line')
                 .data(telemetry_data).enter()
                 .append("svg:line")
-                .attr("x1", function(d) { return this.x(d.x)})
-                .attr("x2", function(d, i) { return telemetry_data[i+1] ? this.x(telemetry_data[i+1].X) : this.x(d.X)})
-                .attr("y1", function(d) { return this.y(d.Y)})
-                .attr("y2", function(d, i) { return telemetry_data[i+1] ? this.y(telemetry_data[i+1].Y) : this.y(d.Y)})
+                .attr("x1", (d) => this.x(d.X))
+                .attr("x2", (d, i) => telemetry_data[i+1] ? this.x(telemetry_data[i+1].X) : this.x(d.X))
+                .attr("y1", (d) => this.y(d.Y))
+                .attr("y2", (d, i) => telemetry_data[i+1] ? this.y(telemetry_data[i+1].Y) : this.y(d.Y))
                 .attr("fill", "none")
                 .attr("stroke", function(d) { return color(d.Speed) })
-                .attr("stroke-width", 15)
+                .attr("stroke-width", 5)
+                .attr("stroke-linecap", "round")
+              
 
 
             this.circle = this.svg.append("g")
