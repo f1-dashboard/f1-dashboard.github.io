@@ -17,23 +17,27 @@ export default {
         calculateDistance(point1, point2) {
             const dx = point1.x - point2.x;
             const dy = point1.y - point2.y;
-            return Math.sqrt(dx * dx + dy * dy);
+            // return Math.sqrt(dx * dx + dy * dy);
+            return dx * dx + dy * dy
         },
         update(point) {
             this.circle.selectAll().remove()
 
             if (point) {
+                // This could be sped up using precomputed voronoi/delauney, or Newton's method
+                // Then again usually data is <1000 points, so it's pretty fast anyway.
                 const closest = d3.least(this.data, d => this.calculateDistance(point, d))
 
-                console.log(point)
-                console.log(closest)
-                this.circle
-                    .selectAll("circle")
-                    .data([closest])
-                    .join("circle")
-                    .attr("cx", d => this.x(d.x))
-                    .attr("cy", d => this.y(d.y))
-                    .attr("r", 3);
+                const distance = Math.sqrt(this.calculateDistance(point, closest));
+                if (distance < 2000) {
+                    this.circle
+                        .selectAll("circle")
+                        .data([closest])
+                        .join("circle")
+                        .attr("cx", d => this.x(d.x))
+                        .attr("cy", d => this.y(d.y))
+                        .attr("r", 3);
+                }
             }
         },
 
@@ -83,7 +87,7 @@ export default {
                 .attr("height", height)
                 .attr("viewBox", [0, 0, width, height])
                 .attr("style", "max-width: 100%; height: auto;")
-                .on("click", event => {
+                .on("mousemove", event => {
                     let [x, y] = d3.pointer(event)
                     x = this.x.invert(x)
                     y = this.y.invert(y)
@@ -122,7 +126,6 @@ export default {
                 .attr("stroke", "black")
                 .attr("stroke-width", 2)
 
-            // Append the SVG element. 
             container.append(this.svg.node())
         },
     }
