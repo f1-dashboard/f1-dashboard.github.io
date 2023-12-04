@@ -34,6 +34,8 @@ export default {
             const format = d3.format("+.3")
             const eps = 0.0000001
 
+            this.$emit('EmitDriver', relativeTo)
+
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))
             this.y.domain(drivers.map(d => d.full_name))

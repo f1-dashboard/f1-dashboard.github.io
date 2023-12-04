@@ -9,8 +9,16 @@
 import * as d3 from "d3";
 
 export default {
+    props: ['driver'],
+
+    watch: {driver: function (newVal, oldVal) {
+            this.init(newVal)
+            console.log('Prop changed: ', newVal, ' | was: ', oldVal)
+        }},
+
     async mounted() {
-        await this.init()
+        await this.init(this.driver)
+        console.log(this.driver)
         this.update(null)
     },
     methods: {
@@ -29,6 +37,7 @@ export default {
                 const closest = d3.least(this.data, d => this.calculateDistance(point, d))
 
                 const distance = Math.sqrt(this.calculateDistance(point, closest));
+       
                 if (distance < 2000) {
                     this.circle
                         .selectAll("circle")
@@ -40,8 +49,12 @@ export default {
                 }
             }
         },
+        distanceEvent(point) {
+            const closest = d3.least(this.data, d => this.calculateDistance(point, d))
+            this.$emit('EmitDistance', closest.dist)
+        },
 
-        async init() {
+        async init(driver) {
             // https://d3js.org/d3-shape/line
 
             // Load data
@@ -49,7 +62,7 @@ export default {
                 return { x: parseFloat(d.X), y: parseFloat(d.Y), dist: parseFloat(d.Distance) }
             });
 
-            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == "Carlos Sainz")
+            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == driver)
         return d})
 
             const extent_x = d3.extent(this.data, d => d.x)
@@ -79,8 +92,6 @@ export default {
                 .x(d => this.x(d.x))
                 .y(d => this.y(d.y))
 
-            console.log(this.track(this.data))
-
             // Create the SVG container.
             this.svg = d3.create("svg")
                 .attr("width", width)
@@ -92,7 +103,13 @@ export default {
                     x = this.x.invert(x)
                     y = this.y.invert(y)
                     this.update({ x: x, y: y })
-                });
+                })
+                .on("click", event => {
+                    let [x, y] = d3.pointer(event)
+                    x = this.x.invert(x)
+                    y = this.y.invert(y)
+                    this.distanceEvent({ x: x, y: y })
+                    });
 
             const length = (path) => d3.create("svg:path").attr("d", path).node().getTotalLength()
             const l = length(this.track(this.data));
@@ -110,9 +127,6 @@ export default {
                 .duration(500)
                 .ease(d3.easeLinear)
                 .attr("stroke-dasharray", `${l},${l}`);
-
-            console.log(d3.extent(telemetry_data, d => +d.Speed))
-            console.log(d3.min(telemetry_data, function(d) { return +d.Speed; }))
 
             // define color range
             var color = d3.scaleLinear()
