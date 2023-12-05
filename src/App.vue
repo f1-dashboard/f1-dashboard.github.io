@@ -25,7 +25,7 @@ let dist = ref(0)
     <QualifyingResult :qualifying=category />
     <TrackVis /> -->
     <v-slider :min="0" :max="5500" @update:model-value="(d) => dist = d" />
-    <SpeedVis :point_distance="dist" />
+    <SpeedVis :distance_highlight="dist" />
   </main>
 </template>
 
