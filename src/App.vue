@@ -5,23 +5,26 @@ import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
 import { ref } from 'vue'
+import DriverProfileVue from './components/DriverProfile.vue'
 
 let category = ref("Q1")
+let focusedDriver = ref("Max Verstappen")
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+    <!-- <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
-    </div>
+    </div> -->
+    <DriverProfileVue :driver="focusedDriver" />
   </header>
 
   <main>
     <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
-    <QualifyingResult :qualifying=category />
-    <TrackVis />
+    <QualifyingResult :qualifying=category @driverFocussed="(d) => focusedDriver = d" />
+    <!-- <TrackVis /> -->
   </main>
 </template>
 

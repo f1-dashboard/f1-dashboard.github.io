@@ -24,6 +24,7 @@ export default {
             console.log('Prop changed: ', newVal, ' | was: ', oldVal)
         }
     },
+    emits: ['driverFocussed'],
     async mounted() {
         await this.init()
         this.update(null)
@@ -31,6 +32,13 @@ export default {
     methods: {
         update(relativeTo) {
             const drivers = this.getDriverData(this.qualifying, relativeTo)
+
+            if (relativeTo === null) {
+                relativeTo = drivers[0].full_name
+                console.log(relativeTo)
+            }
+            this.$emit('driverFocussed', relativeTo)
+
             const format = d3.format("+.3")
             const eps = 0.0000001
 
