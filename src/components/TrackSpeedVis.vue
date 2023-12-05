@@ -55,6 +55,9 @@ export default {
                 // check valid driver name
                 return true
             }
+        },
+        relative: {
+            default: false
         }
     },
     watch: {
@@ -69,7 +72,9 @@ export default {
         await this.init()
         this.set_drivers(["Lewis Hamilton"])
         this.set_drivers(["Carlos Sainz", "Max Verstappen"])
-        // this.set_relative_to("Carlos Sainz")
+        if (this.relative) {
+            this.set_relative_to("Carlos Sainz")
+        }
     },
     methods: {
         set_relative_to(driver) {

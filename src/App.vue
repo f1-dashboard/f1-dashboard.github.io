@@ -26,6 +26,8 @@ let dist = ref(0)
     <TrackVis /> -->
     <v-slider :min="0" :max="5500" @update:model-value="(d) => dist = d" />
     <TrackSpeedVis :distance_highlight="dist" />
+    <TrackSpeedVis :distance_highlight="dist" :relative="true" />
+
   </main>
 </template>
 
