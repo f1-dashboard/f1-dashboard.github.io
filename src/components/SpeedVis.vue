@@ -46,16 +46,47 @@ export default {
             } else {
                 xm = dist
             }
-            const horizontal_distance = ([x, y]) => Math.abs(x - xm)
+            // Change line
+            this.distance_line
+                .attr('x1', xm)
+                .attr('x2', xm)
 
+            // Change dots
+            const horizontal_distance = ([x, y]) => Math.abs(x - xm)
+            this.dots.selectAll("circle").remove()
+            this.dots.selectAll("text").remove()
+
+            let y_positions = []
             for (const [driver, data] of this.filtered_data.entries()) {
-                const [x, y, full_name] = d3.least(data, horizontal_distance);
-                this.dot.select("text").text(full_name);
-                this.dot.attr("transform", `translate(${x},${y})`)
+                const [x, y, full_name, team] = d3.least(data, horizontal_distance);
+                this.dots.append("circle")
+                    .attr("r", 4)
+                    .attr("transform", `translate(${x},${y})`)
+                    .attr("fill", colors[team])
+
+                const textNode = this.dots.append("text")
+                    .text(full_name)
+                    .attr("fill", colors[team]);
+
+                y_positions.push([y, textNode])
+
                 this.svg.property("value", full_name).dispatch("input", { bubbles: true });
-                this.distance_line
-                    .attr('x1', x)
-                    .attr('x2', x)
+            }
+
+            // Change y positions so names aren't overlapping
+            const min_dist = 20;
+            for (let i = 0; i < y_positions.length; i++) {
+                let [y, node] = y_positions[i]
+                node.attr("transform", `translate(${xm},${y})`)
+                    .attr("y", 2);
+
+                if (i % 2 === 0) {
+                    node.attr("text-anchor", "start")
+                        .attr("x", 8)
+                } else {
+                    node.attr("text-anchor", "end")
+                        .attr("x", -8)
+                }
             }
         },
 
@@ -152,16 +183,10 @@ export default {
 
 
             // Add an invisible layer for the interactive tip.
-            this.dot = this.svg.append("g")
+            this.dots = this.svg.append("g")
                 .attr("display", "none");
 
-            this.dot.append("circle")
-                .attr("r", 2.5);
 
-            this.dot.append("text")
-                .attr("text-anchor", "right")
-                .attr("x", 8)
-                .attr("y", 2);
 
             this.svg
                 .on("pointermove", this.pointermoved)
@@ -180,12 +205,12 @@ export default {
         },
 
         showDistanceLine() {
-            this.dot.attr("display", null);
+            this.dots.attr("display", null);
             this.distance_line.attr("display", null)
         },
 
         hideDistanceLine() {
-            this.dot.attr("display", "none");
+            this.dots.attr("display", "none");
             this.distance_line.attr("display", "none")
 
             this.svg.node().value = null;
