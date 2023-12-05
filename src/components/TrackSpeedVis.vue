@@ -20,6 +20,28 @@ const colors = {
     alfa: "#c92d4b",
     haas: "#b6babd",
 }
+
+function linearInterpolate(x, p0, p1) {
+    const t = (x - p0[4]) / (p1[4] - p0[4]);
+    return p0[5] + t * (p1[5] - p0[5]);
+}
+
+function cubicBezierInterpolation(x, p0, p1, p2, p3) {
+    const t = (x - p0[4]) / (p3[4] - p0[4]);
+    const u = 1 - t;
+    const tt = t * t;
+    const uu = u * u;
+    const uuu = uu * u;
+    const ttt = tt * t;
+
+    const p = [];
+    p[4] = uuu * p0[4] + 3 * uu * t * p1[4] + 3 * u * tt * p2[4] + ttt * p3[4];
+    p[5] = uuu * p0[5] + 3 * uu * t * p1[5] + 3 * u * tt * p2[5] + ttt * p3[5];
+
+    return p[5];
+}
+
+
 export default {
     props: {
         distance_highlight: {
@@ -45,9 +67,62 @@ export default {
     },
     async mounted() {
         await this.init()
+        this.set_drivers(["Lewis Hamilton"])
         this.set_drivers(["Carlos Sainz", "Max Verstappen"])
+        // this.set_relative_to("Carlos Sainz")
     },
     methods: {
+        set_relative_to(driver) {
+            this.y.domain([-20, 20]).nice()
+            this.gy.call(d3.axisLeft(this.y))
+
+            let relative_data = new Map()
+            for (const [name, driver_data] of this.filtered_data) {
+                let data = new Array()
+                for (const point of driver_data) {
+                    const [x, y, name, team, dist, speed] = point
+                    // get the interpolated dist, speed from the relative drive
+                    const relativeSpeed = this.get_interpolated_speed(driver, dist) - speed
+                    data.push([x, this.y(relativeSpeed)])
+                }
+                data["full_name"] = name
+                data["team"] = driver_data.team
+                relative_data.set(name, data)
+            }
+            console.log(relative_data.values().next())
+            console.log(this.filtered_data.values().next())
+
+            this.driver_lines
+                .selectAll("path")
+                .data(relative_data.values())
+                .join("path")
+                .style("mix-blend-mode", "multiply")
+                .attr("d", this.line)
+                .style("stroke", d => colors[d.team])
+        },
+
+        get_interpolated_speed(driver, dist) {
+            // filtered data is array of [x (pixel space), y (pixel space), full_name, team, dist, speed]
+            const data = this.filtered_data.get(driver)
+            let i = 0;
+            while (i < data.length && data[i][4] < dist) {
+                i++;
+            }
+
+            if (i === 0) {
+                return data[0][1];
+            }
+            if (i === data.length) {
+                return data[data.length - 1][1];
+            }
+            if (i === data.length - 1 || i === 1) {
+                return linearInterpolate(dist, data[i - 1], data[i])
+            }
+
+            return cubicBezierInterpolation(dist, data[i - 2], data[i - 1], data[i], data[i + 1]);
+        },
+
+        // Update the line + dots visualization based on x value
         set_distance(dist, pixel_space = false) {
             let xm;
             if (!pixel_space) {
@@ -55,6 +130,7 @@ export default {
             } else {
                 xm = dist
             }
+
             // Change line
             this.distance_line
                 .attr('x1', xm)
@@ -101,7 +177,7 @@ export default {
 
         set_drivers(drivers) {
             this.filtered_data = new Map();
-            for (const driver_data of this.data.values()) {
+            for (const driver_data of this.pixel_data.values()) {
                 if (drivers.includes(driver_data.full_name)) {
                     this.filtered_data.set(driver_data.full_name, driver_data)
                 }
@@ -136,13 +212,15 @@ export default {
             const width = 640;
             const height = 400;
 
+            this.maxX = d3.max(this.data_raw, d => d.dist)
             // Declare the scales
             this.x = d3.scaleLinear()
-                .domain([0, d3.max(this.data_raw, d => d.dist)]).nice()
+                .domain([0, this.maxX]).nice()
                 .range([marginLeft, width - marginRight])
 
             this.y = d3.scaleLinear()
-                .domain(d3.extent(this.data_raw, d => d.speed)).nice()
+                // .domain(d3.extent(this.data_raw, d => d.speed)).nice()
+                .domain([0, d3.max(this.data_raw, d => d.speed)]).nice()
                 .range([height - marginBottom, marginTop])
 
             // Create the SVG container.
@@ -158,16 +236,15 @@ export default {
                 .call(d3.axisBottom(this.x));
 
             // Add the y-axis.
-            this.svg.append("g")
+            this.gy = this.svg.append("g")
                 .attr("transform", `translate(${marginLeft},0)`)
                 .call(d3.axisLeft(this.y));
 
             // compute poitns in pixel space [x, y, z] where z is the driver 
-            this.points = this.data_raw.map(d => [this.x(d.dist), this.y(d.speed), d.full_name, d.team])
+            this.points = this.data_raw.map(d => [this.x(d.dist), this.y(d.speed), d.full_name, d.team, d.dist, d.speed])
 
             // create map of driver name -> track points
-            this.data = d3.rollup(this.points, v => Object.assign(v, { full_name: v[0][2], team: v[0][3] }), d => d[2])
-
+            this.pixel_data = d3.rollup(this.points, v => Object.assign(v, { full_name: v[0][2], team: v[0][3] }), d => d[2])
 
             // draw distance line highlight
             this.distance_line = this.svg
