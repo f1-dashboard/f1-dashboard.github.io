@@ -4,7 +4,7 @@ import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
-import SpeedVis from './components/SpeedVis.vue'
+import TrackSpeedVis from './components/TrackSpeedVis.vue'
 import { ref } from 'vue'
 
 let category = ref("Q1")
@@ -25,7 +25,7 @@ let dist = ref(0)
     <QualifyingResult :qualifying=category />
     <TrackVis /> -->
     <v-slider :min="0" :max="5500" @update:model-value="(d) => dist = d" />
-    <SpeedVis :distance_highlight="dist" />
+    <TrackSpeedVis :distance_highlight="dist" />
   </main>
 </template>
 

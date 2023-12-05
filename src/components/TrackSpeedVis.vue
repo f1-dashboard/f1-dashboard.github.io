@@ -27,11 +27,20 @@ export default {
                 // check between 0 and max distance
                 return true
             }
+        },
+        drivers: {
+            validator(value) {
+                // check valid driver name
+                return true
+            }
         }
     },
     watch: {
         distance_highlight: function (newVal, oldVal) {
             this.set_distance(newVal)
+        },
+        drivers: function (newVal, oldVal) {
+            this.set_drivers(neVal)
         }
     },
     async mounted() {
