@@ -36,32 +36,40 @@ export default {
     },
     async mounted() {
         await this.init()
-        // this.set_drivers(["Carlos Sainz"])
+        this.set_drivers(["Carlos Sainz", "Max Verstappen"])
     },
     methods: {
         set_distance(dist, pixel_space = false) {
-            const i = d3.leastIndex(this.points, ([x, y]) => Math.abs(x - dist));
-            let x;
+            let xm;
             if (!pixel_space) {
-                x = this.x(dist)
+                xm = this.x(dist)
             } else {
-                x = dist
+                xm = dist
             }
-            this.distance_line
-                .attr('x1', x)
-                .attr('x2', x)
+            const horizontal_distance = ([x, y]) => Math.abs(x - xm)
+
+            for (const [driver, data] of this.filtered_data.entries()) {
+                const [x, y, full_name] = d3.least(data, horizontal_distance);
+                this.dot.select("text").text(full_name);
+                this.dot.attr("transform", `translate(${x},${y})`)
+                this.svg.property("value", full_name).dispatch("input", { bubbles: true });
+                this.distance_line
+                    .attr('x1', x)
+                    .attr('x2', x)
+            }
         },
 
         set_drivers(drivers) {
-            let filtered_data = []
+            this.filtered_data = new Map();
             for (const driver_data of this.data.values()) {
                 if (drivers.includes(driver_data.full_name)) {
-                    filtered_data.push(driver_data)
+                    this.filtered_data.set(driver_data.full_name, driver_data)
                 }
             }
 
-            this.driver_lines.selectAll("path")
-                .data(filtered_data)
+            this.driver_lines
+                .selectAll("path")
+                .data(this.filtered_data.values())
                 .join("path")
                 .style("mix-blend-mode", "multiply")
                 .attr("d", this.line)
@@ -74,8 +82,6 @@ export default {
                 let driver = {
                     full_name: d.FullName,
                     team: d.TeamId,
-                    // x: parseFloat(d.X),
-                    // y: parseFloat(d.Y),
                     dist: parseFloat(d.Distance),
                     speed: parseFloat(d.Speed),
                 };
@@ -126,6 +132,7 @@ export default {
             // draw distance line highlight
             this.distance_line = this.svg
                 .append('line')
+                .attr("display", "none")
                 .attr('x1', 300)
                 .attr('y1', height - marginBottom)
                 .attr('x2', 300)
@@ -142,13 +149,6 @@ export default {
                 .attr("stroke-width", 1.5)
                 .attr("stroke-linejoin", "round")
                 .attr("stroke-linecap", "round")
-                .selectAll("path")
-                .data(this.data.values())
-                .join("path")
-                .filter(d => d.full_name === "Carlos Sainz")
-                .style("mix-blend-mode", "multiply")
-                .attr("d", this.line)
-                .style("stroke", d => colors[d.team])
 
 
             // Add an invisible layer for the interactive tip.
@@ -159,40 +159,35 @@ export default {
                 .attr("r", 2.5);
 
             this.dot.append("text")
-                .attr("text-anchor", "middle")
-                .attr("y", -8);
-
-
+                .attr("text-anchor", "right")
+                .attr("x", 8)
+                .attr("y", 2);
 
             this.svg
-                .on("pointerenter", this.pointerentered)
                 .on("pointermove", this.pointermoved)
-                .on("pointerleave", this.pointerleft)
+                .on("pointerenter", this.showDistanceLine)
+                // .on("pointerleave", this.hideDistanceLine)
                 .on("touchstart", event => event.preventDefault());
 
             container.append(this.svg.node())
         },
 
+        // Update dots
         pointermoved(event) {
             const [xm, ym] = d3.pointer(event);
-            const [x, y, full_name] = d3.least(this.data.get("Carlos Sainz"), ([x, y]) => Math.hypot(x - xm, y - ym));
-            this.driver_lines
-                .style("stroke", (d) => d.full_name === full_name ? colors[d.team] : "#ddd")
-                .filter(d => d.full_name === full_name).raise();
-            this.dot.attr("transform", `translate(${x},${y})`);
-            this.dot.select("text").text(full_name);
-            this.svg.property("value", full_name).dispatch("input", { bubbles: true });
-            this.set_distance(x, true);
+
+            this.set_distance(xm, true)
         },
 
-        pointerentered() {
-            this.driver_lines.style("mix-blend-mode", null).style("stroke", "#ddd");
+        showDistanceLine() {
             this.dot.attr("display", null);
+            this.distance_line.attr("display", null)
         },
 
-        pointerleft() {
-            this.driver_lines.style("mix-blend-mode", "multiply").style("stroke", d => colors[d.team]);
+        hideDistanceLine() {
             this.dot.attr("display", "none");
+            this.distance_line.attr("display", "none")
+
             this.svg.node().value = null;
             this.svg.dispatch("input", { bubbles: true });
         }
