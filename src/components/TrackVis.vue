@@ -11,16 +11,15 @@ import * as d3 from "d3";
 export default {
     props: ['driver'],
 
-    watch: {
-        driver: function (newVal, oldVal) {
-            this.init(newVal)
-            console.log('Prop changed: ', newVal, ' | was: ', oldVal)
+    watch: {driver: function (newVal, oldVal) {
+            console.log('Driver changed: ', newVal, ' | was: ', oldVal)
+            this.visualizeTrack(newVal)
         }
     },
 
     async mounted() {
         await this.init(this.driver)
-        console.log(this.driver)
+        this.visualizeTrack(this.driver)
         this.update(null)
     },
     methods: {
@@ -55,6 +54,29 @@ export default {
             const closest = d3.least(this.data, d => this.calculateDistance(point, d))
             this.$emit('EmitDistance', closest.dist)
         },
+        async visualizeTrack(driver)  {
+            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == driver)
+        return d})
+
+        // define color range
+        var color = d3.scaleLinear()
+                .domain(d3.extent(telemetry_data, d => +d.Speed))
+                .range(["red", "blue"]);
+
+            this.svg.selectAll('line')
+                .data(telemetry_data).enter()
+                .append("svg:line")
+                .attr("x1", (d) => this.x(d.X))
+                .attr("x2", (d, i) => telemetry_data[i+1] ? this.x(telemetry_data[i+1].X) : this.x(d.X))
+                .attr("y1", (d) => this.y(d.Y))
+                .attr("y2", (d, i) => telemetry_data[i+1] ? this.y(telemetry_data[i+1].Y) : this.y(d.Y))
+                .attr("fill", "none")
+                .attr("stroke", function(d) { return color(d.Speed) })
+                .attr("stroke-width", 5)
+                .attr("stroke-linecap", "round")
+
+            container.append(this.svg.node())
+        },
 
         async init(driver) {
             // https://d3js.org/d3-shape/line
@@ -63,11 +85,6 @@ export default {
             this.data = await d3.csv("../data/monza_circuit.csv", d => {
                 return { x: parseFloat(d.X), y: parseFloat(d.Y), dist: parseFloat(d.Distance) }
             });
-
-            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {
-                if (d.FullName == driver)
-                    return d
-            })
 
             const extent_x = d3.extent(this.data, d => d.x)
             const extent_y = d3.extent(this.data, d => d.y)
@@ -126,30 +143,13 @@ export default {
                 .duration(500)
                 .ease(d3.easeLinear)
                 .attr("stroke-dasharray", `${l},${l}`);
-
-            // define color range
-            var color = d3.scaleLinear()
-                .domain(d3.extent(telemetry_data, d => +d.Speed))
-                .range(["red", "blue"]);
-
-            this.svg.selectAll('line')
-                .data(telemetry_data).enter()
-                .append("svg:line")
-                .attr("x1", (d) => this.x(d.X))
-                .attr("x2", (d, i) => telemetry_data[i + 1] ? this.x(telemetry_data[i + 1].X) : this.x(d.X))
-                .attr("y1", (d) => this.y(d.Y))
-                .attr("y2", (d, i) => telemetry_data[i + 1] ? this.y(telemetry_data[i + 1].Y) : this.y(d.Y))
-                .attr("fill", "none")
-                .attr("stroke", function (d) { return color(d.Speed) })
-                .attr("stroke-width", 5)
-                .attr("stroke-linecap", "round")
-
-
+              
 
             this.circle = this.svg.append("g")
                 .attr("fill", "white")
                 .attr("stroke", "black")
                 .attr("stroke-width", 2)
+
 
             container.append(this.svg.node())
         },
