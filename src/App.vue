@@ -4,9 +4,11 @@ import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
+import TrackSpeedVis from './components/TrackSpeedVis.vue'
 import { ref } from 'vue'
 
 let category = ref("Q1")
+
 let distance  = ref(1)
 let driver = ref("Carlos Sainz")
 </script>
@@ -21,6 +23,10 @@ let driver = ref("Carlos Sainz")
   </header>
 
   <main>
+    <v-slider :min="0" :max="5500" @update:model-value="(d) => dist = d" />
+    <TrackSpeedVis :distance_highlight="distance" />
+    <TrackSpeedVis :distance_highlight="distance" :relative="true" />
+
     <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
     <QualifyingResult :qualifying=category @EmitDriver="(n) => driver = n"/>
     <TrackVis :driver=driver @EmitDistance="(n) => distance = n"/>
