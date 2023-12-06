@@ -6,6 +6,7 @@ import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
 import TrackSpeedVis from './components/TrackSpeedVis.vue'
 import { ref } from 'vue'
+import InfoCard from './components/InfoCard.vue'
 
 let category = ref("Q1")
 
@@ -29,6 +30,7 @@ let driver = ref("Carlos Sainz")
     <!-- <TrackSpeedVis :distance_highlight="distance" :relative="true" /> -->
 
     <TrackVis :driver=driver @EmitDistance="(n) => distance = n" />
+    <InfoCard :driver=driver />
   </main>
 </template>
 
