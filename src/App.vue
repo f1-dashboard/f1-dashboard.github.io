@@ -9,27 +9,26 @@ import { ref } from 'vue'
 
 let category = ref("Q1")
 
-let distance  = ref(1)
+let distance = ref(1)
 let driver = ref("Carlos Sainz")
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+    <!-- <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
       <HelloWorld msg="You did it!" />
-    </div>
+    </div> -->
+    <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
+    <QualifyingResult :qualifying=category @EmitDriver="(n) => driver = n" />
   </header>
 
   <main>
-    <v-slider :min="0" :max="5500" @update:model-value="(d) => dist = d" />
     <TrackSpeedVis :distance_highlight="distance" />
-    <TrackSpeedVis :distance_highlight="distance" :relative="true" />
+    <!-- <TrackSpeedVis :distance_highlight="distance" :relative="true" /> -->
 
-    <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
-    <QualifyingResult :qualifying=category @EmitDriver="(n) => driver = n"/>
-    <TrackVis :driver=driver @EmitDistance="(n) => distance = n"/>
+    <TrackVis :driver=driver @EmitDistance="(n) => distance = n" />
   </main>
 </template>
 
