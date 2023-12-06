@@ -8,7 +8,9 @@ import TrackSpeedVis from './components/TrackSpeedVis.vue'
 import { ref } from 'vue'
 
 let category = ref("Q1")
-let dist = ref(0)
+
+let distance  = ref(1)
+let driver = ref("Carlos Sainz")
 </script>
 
 <template>
@@ -21,13 +23,13 @@ let dist = ref(0)
   </header>
 
   <main>
-    <!-- <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
-    <QualifyingResult :qualifying=category />
-    <TrackVis /> -->
     <v-slider :min="0" :max="5500" @update:model-value="(d) => dist = d" />
-    <TrackSpeedVis :distance_highlight="dist" />
-    <TrackSpeedVis :distance_highlight="dist" :relative="true" />
+    <TrackSpeedVis :distance_highlight="distance" />
+    <TrackSpeedVis :distance_highlight="distance" :relative="true" />
 
+    <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
+    <QualifyingResult :qualifying=category @EmitDriver="(n) => driver = n"/>
+    <TrackVis :driver=driver @EmitDistance="(n) => distance = n"/>
   </main>
 </template>
 
