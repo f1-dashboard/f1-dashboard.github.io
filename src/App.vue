@@ -29,7 +29,7 @@ const updateRound = (newRound) => {
     </div>
 
     <div class="center">
-      <TrackVis :driver=driver @EmitDistance="(n) => distance = n" />
+      <TrackVis :driver=driver :circuit=round @EmitDistance="(n) => distance = n" />
     </div>
 
     <div class="right">
