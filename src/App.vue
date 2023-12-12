@@ -33,7 +33,7 @@ const updateRound = (newRound) => {
     </div>
 
     <div class="right">
-      <TrackSpeedVis :distance_highlight="distance" />
+      <TrackSpeedVis :distance_highlight="distance" :circuit=round />
     </div>
   </div>
 </template>
