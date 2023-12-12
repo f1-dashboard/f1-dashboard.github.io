@@ -1,64 +1,53 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
 import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
 import DropDown from './components/simple/DropDown.vue'
 import TrackSpeedVis from './components/TrackSpeedVis.vue'
+import RaceDropdown from './components/RaceDropdown.vue'
 import { ref } from 'vue'
 import InfoCard from './components/InfoCard.vue'
 
 let category = ref("Q1")
-
 let distance = ref(1)
 let driver = ref("Carlos Sainz")
+let round = "..."
 </script>
 
 <template>
-  <header>
-    <!-- <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
+  <div class="header">
+    <RaceDropdown @round-selected="roundSelected"></RaceDropdown>
+  </div>
+  
+  <div class="content">
+    <div class="left">
+      left
+    </div>
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div> -->
-    <DropDown :items="['Q1', 'Q2', 'Q3']" @clicked="(n) => category = n" />
-    <QualifyingResult :qualifying=category @EmitDriver="(n) => driver = n" />
-  </header>
+    <div class="center">
+      center
+    </div>
 
-  <main>
-    <TrackSpeedVis :distance_highlight="distance" />
-    <!-- <TrackSpeedVis :distance_highlight="distance" :relative="true" /> -->
-
-    <TrackVis :driver=driver @EmitDistance="(n) => distance = n" />
-    <InfoCard :driver=driver />
-  </main>
+    <div class="right">
+      right
+    </div>
+  </div>
 </template>
 
 <style scoped>
-header {
-  line-height: 1.5;
+.header {
+  text-align: center;
+  font-size: 1.7em;
+  text-align: center;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+.content {
+  display: grid; 
+  grid-template-columns: 1fr 1fr 1fr; 
+  gap: 3px; 
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.content > div {
+  text-align: center;
 }
 </style>
+
