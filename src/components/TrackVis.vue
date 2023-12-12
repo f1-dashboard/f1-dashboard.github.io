@@ -2,6 +2,8 @@
     <div>
         <h2>Monza Circuit</h2>
         <div id="container"></div>
+        <input type="checkbox" id="brakingCheckbox">
+        <label for="brakingCheckbox">Show Braking</label>
     </div>
 </template>
 
@@ -63,8 +65,6 @@ export default {
                 .domain(d3.extent(telemetry_data, d => +d.Speed))
                 .range(["red", "blue"]);
 
-        var brakingColor = "black";
-
             this.svg.selectAll('line')
                 .data(telemetry_data).enter()
                 .append("svg:line")
@@ -77,12 +77,19 @@ export default {
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
 
+                
+            container.append(this.svg.node())
+        },
+
+        async drawBrakingLines(driver) {
+            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == driver)
+        return d})
+            
         let currentBrakingSection = null;
         const brakingSections = [];
 
         telemetry_data.forEach((data, index) => {
             if (data.Brake == 'True') {
-                console.log(data.Brake)
                 if (!currentBrakingSection) {
                     currentBrakingSection = { start: index, end: index };
                 } else {
@@ -100,8 +107,6 @@ export default {
             brakingSections.push(currentBrakingSection);
         }
 
-        console.log(brakingSections)
-
         // Draw lines for each braking section
         brakingSections.forEach(section => {
             const startX = telemetry_data[section.start].X;
@@ -118,8 +123,6 @@ export default {
                 .attr("stroke-width", 15)
                 .style("stroke-opacity", 0.5);
         });
-
-            container.append(this.svg.node())
         },
 
         async init(driver) {
@@ -170,6 +173,17 @@ export default {
                     this.update({ x: x, y: y })
                     this.distanceEvent({ x: x, y: y })
                 })
+
+                const checkbox = document.getElementById('brakingCheckbox');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        this.drawBrakingLines(this.driver);
+                    } else {
+                        // If checkbox is unchecked, remove braking lines
+                        this.svg.selectAll('.braking-line').remove();
+                    }
+                });
+
 
             const length = (path) => d3.create("svg:path").attr("d", path).node().getTotalLength()
             const l = length(this.track(this.data));
