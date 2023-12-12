@@ -115,6 +115,7 @@ export default {
             const endY = telemetry_data[section.end].Y;
 
             this.svg.append("line")
+                .attr("class", "braking-line")
                 .attr("x1", this.x(startX))
                 .attr("y1", this.y(startY))
                 .attr("x2", this.x(endX))
