@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Monza 2023 {{ qualifying }} Results</h2>
-        <div id="container"></div>
+        <h2>{{ qualifying }} Results</h2>
+        <div id="qual"></div>
     </div>
 </template>
 
@@ -175,7 +175,7 @@ export default {
                 .call(d3.axisLeft(this.y).tickSize(0));
 
             // Append the SVG element. 
-            container.append(this.svg.node())
+            qual.append(this.svg.node())
 
             this.drivers = await data;
         },

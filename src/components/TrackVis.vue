@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Monza Circuit</h2>
-        <div id="container"></div>
+        <h2>Circuit</h2>
+        <div id="trackvis"></div>
     </div>
 </template>
 
@@ -75,7 +75,7 @@ export default {
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
 
-            container.append(this.svg.node())
+            trackvis.append(this.svg.node())
         },
 
         async init(driver) {
@@ -151,7 +151,7 @@ export default {
                 .attr("stroke-width", 2)
 
 
-            container.append(this.svg.node())
+            trackvis.append(this.svg.node())
         },
     }
 };

@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Monza Circuit</h2>
-        <div id="container"></div>
+        <h2>Speed on track</h2>
+        <div id="trackspeedvis"></div>
     </div>
 </template>
 
@@ -343,7 +343,7 @@ export default {
                 // .on("pointerleave", this.hideDistanceLine)
                 .on("touchstart", event => event.preventDefault());
 
-            container.append(this.svg.node())
+                trackspeedvis.append(this.svg.node())
         },
 
         // Update dots
