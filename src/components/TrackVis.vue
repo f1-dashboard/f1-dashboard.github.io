@@ -63,6 +63,8 @@ export default {
                 .domain(d3.extent(telemetry_data, d => +d.Speed))
                 .range(["red", "blue"]);
 
+        var brakingColor = "black";
+
             this.svg.selectAll('line')
                 .data(telemetry_data).enter()
                 .append("svg:line")
@@ -74,6 +76,48 @@ export default {
                 .attr("stroke", function(d) { return color(d.Speed) })
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
+
+        let currentBrakingSection = null;
+        const brakingSections = [];
+
+        telemetry_data.forEach((data, index) => {
+            if (data.Brake == 'True') {
+                console.log(data.Brake)
+                if (!currentBrakingSection) {
+                    currentBrakingSection = { start: index, end: index };
+                } else {
+                    currentBrakingSection.end = index;
+                }
+            } else {
+                if (currentBrakingSection) {
+                    brakingSections.push(currentBrakingSection);
+                    currentBrakingSection = null;
+                }
+            }
+        });
+
+        if (currentBrakingSection) {
+            brakingSections.push(currentBrakingSection);
+        }
+
+        console.log(brakingSections)
+
+        // Draw lines for each braking section
+        brakingSections.forEach(section => {
+            const startX = telemetry_data[section.start].X;
+            const startY = telemetry_data[section.start].Y;
+            const endX = telemetry_data[section.end].X;
+            const endY = telemetry_data[section.end].Y;
+
+            this.svg.append("line")
+                .attr("x1", this.x(startX))
+                .attr("y1", this.y(startY))
+                .attr("x2", this.x(endX))
+                .attr("y2", this.y(endY))
+                .attr("stroke", "black")
+                .attr("stroke-width", 15)
+                .style("stroke-opacity", 0.5);
+        });
 
             container.append(this.svg.node())
         },
