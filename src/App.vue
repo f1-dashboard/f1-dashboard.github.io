@@ -1,7 +1,7 @@
 <script setup>
 import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
-import TrackSpeedVis from './components/TrackSpeedVis.vue'
+import SpeedVis from './components/SpeedVis.vue'
 import RaceDropdown from './components/RaceDropdown.vue'
 import { ref } from 'vue'
 import InfoCard from './components/InfoCard.vue'
@@ -33,7 +33,7 @@ const updateRound = (newRound) => {
     </div>
 
     <div class="right">
-      <TrackSpeedVis :distance_highlight="distance" :circuit=round />
+      <SpeedVis :distance_highlight="distance" :circuit=round />
     </div>
   </div>
 </template>
