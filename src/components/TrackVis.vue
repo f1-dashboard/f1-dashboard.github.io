@@ -86,7 +86,7 @@ export default {
         },
 
         async drawBrakingLines(driver) {
-            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == driver)
+            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {if (d.FullName == driver)
         return d})
             
         let currentBrakingSection = null;
