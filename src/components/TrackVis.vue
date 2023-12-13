@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Monza Circuit</h2>
-        <div id="container"></div>
+        <h2>Circuit</h2>
+        <div id="trackvis"></div>
     </div>
 </template>
 
@@ -9,11 +9,16 @@
 import * as d3 from "d3";
 
 export default {
-    props: ['driver'],
+    props: ['driver', 'circuit'],
 
-    watch: {driver: function (newVal, oldVal) {
-            console.log('Driver changed: ', newVal, ' | was: ', oldVal)
-            this.visualizeTrack(newVal)
+    watch: {
+        driver: function (newVal, oldVal) {
+            console.log('Driver changed: ', newVal, ' | was: ', oldVal);
+            this.visualizeTrack(newVal);
+        },
+        circuit: function(newVal, oldVal) {
+            console.log('Circuit changed: ', newVal, ' | was: ', oldVal);
+            this.init(this.driver); 
         }
     },
 
@@ -55,7 +60,7 @@ export default {
             this.$emit('EmitDistance', closest.dist)
         },
         async visualizeTrack(driver)  {
-            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == driver)
+            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {if (d.FullName == driver)
         return d})
 
         // define color range
@@ -75,14 +80,15 @@ export default {
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
 
-            container.append(this.svg.node())
+            trackvis.append(this.svg.node())
         },
 
         async init(driver) {
-            // https://d3js.org/d3-shape/line
+            // Clear existing SVG element (if any)
+            d3.select('#trackvis').selectAll('svg').remove();
 
             // Load data
-            this.data = await d3.csv("../data/monza_circuit.csv", d => {
+            this.data = await d3.csv("../data/data/" + this.circuit + "/circuit.csv", d => {
                 return { x: parseFloat(d.X), y: parseFloat(d.Y), dist: parseFloat(d.Distance) }
             });
 
@@ -151,7 +157,7 @@ export default {
                 .attr("stroke-width", 2)
 
 
-            container.append(this.svg.node())
+            trackvis.append(this.svg.node())
         },
     }
 };

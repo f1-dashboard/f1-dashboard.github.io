@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Monza Circuit</h2>
-        <div id="container"></div>
+        <h2>Speed on track</h2>
+        <div id="trackspeedvis"></div>
     </div>
 </template>
 
@@ -60,6 +60,9 @@ export default {
         },
         relative: {
             default: false
+        },
+        circuit: {
+            default: 1
         }
     },
     watch: {
@@ -68,7 +71,15 @@ export default {
         },
         drivers: function (newVal, oldVal) {
             this.set_drivers(neVal)
-        }
+        },
+        circuit: async function (newVal, oldVal) {
+            await this.init()
+            this.set_drivers(["Lewis Hamilton"])
+            this.set_drivers(["Carlos Sainz", "Max Verstappen"])
+            if (this.relative) {
+                this.set_relative_to("Carlos Sainz")
+            }
+        },
     },
     async mounted() {
         await this.init()
@@ -256,8 +267,11 @@ export default {
         },
 
         async init() {
+            // Clear existing SVG element (if any)
+            d3.select('#trackspeedvis').selectAll('svg').remove();
+
             // Load data
-            this.data_raw = await d3.csv("../data/monza_2023_fastest_laps.csv", d => {
+            this.data_raw = await d3.csv("../data/data/" + this.circuit + "/fastest_laps.csv", d => {
                 let driver = {
                     full_name: d.FullName,
                     team: d.TeamId,
@@ -343,7 +357,7 @@ export default {
                 // .on("pointerleave", this.hideDistanceLine)
                 .on("touchstart", event => event.preventDefault());
 
-            container.append(this.svg.node())
+                trackspeedvis.append(this.svg.node())
         },
 
         // Update dots
