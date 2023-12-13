@@ -6,9 +6,12 @@ import RaceDropdown from './components/RaceDropdown.vue'
 import { ref } from 'vue'
 import InfoCard from './components/InfoCard.vue'
 import GapVis from './components/GapVis.vue'
+import QualifyingSelector from './components/QualifyingSelector.vue'
 
-let category = ref("Q1")
+let quali = ref("Q1")
 let distance = ref(1)
+
+// Drivers is a list (max 2) of drivers that will be compared
 let drivers = ref(["Carlos Sainz"])
 let round = ref(1)
 
@@ -25,12 +28,13 @@ const updateRound = (newRound) => {
 
   <div class="content">
     <div class="left">
-      <QualifyingResult :qualifying=category :circuit=round @EmitDriver="(n) => drivers = [n]" />
       <InfoCard id="ic" :drivers=drivers />
+      <QualifyingResult :qualifying=quali :circuit=round @EmitDriver="(n) => drivers = [n]" />
     </div>
 
     <div class="center">
       <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance" />
+      <QualifyingSelector @QualiChanged="q => quali = q" />
     </div>
 
     <div class="right">
