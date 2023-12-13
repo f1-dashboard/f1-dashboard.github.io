@@ -1,7 +1,7 @@
 <template>
     <div>
-        <h2>Monza 2023 {{ qualifying }} Results</h2>
-        <div id="container"></div>
+        <h2>{{ qualifying }} Results</h2>
+        <div id="qual"></div>
     </div>
 </template>
 
@@ -34,10 +34,18 @@ export default {
             validator(value) {
                 return qualis.includes(value)
             }
+        },
+        circuit: {
+            default: 1
         }
     },
     watch: {
         qualifying: function (newVal, oldVal) {
+            this.update(null)
+            console.log('Prop changed: ', newVal, ' | was: ', oldVal)
+        },
+        circuit: async function (newVal, oldVal) {
+            await this.init()
             this.update(null)
             console.log('Prop changed: ', newVal, ' | was: ', oldVal)
         }
@@ -117,8 +125,11 @@ export default {
         },
 
         async init() {
+            // Clear existing SVG element (if any)
+            d3.select('#qual').selectAll('svg').remove();
+
             // Load data
-            const data = d3.csv("./data/monza_qualifying_2023.csv", (d) => {
+            const data = d3.csv("./data/data/" + this.circuit + "/qual_results.csv", (d) => {
                 let driver = {
                     full_name: d.FullName,
                     team: d.TeamId
@@ -180,7 +191,7 @@ export default {
                 .call(d3.axisLeft(this.y).tickSize(0));
 
             // Append the SVG element. 
-            container.append(this.svg.node())
+            qual.append(this.svg.node())
 
             this.drivers = await data;
         },
