@@ -30,12 +30,12 @@ const updateRound = (newRound) => {
     </div>
 
     <div class="center">
-      <TrackVis :driver=driver :circuit=round @EmitDistance="(n) => distance = n" />
+      <TrackVis :driver=driver :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance" />
     </div>
 
     <div class="right">
-      <SpeedVis :distance_highlight="distance" :circuit=round />
-      <GapVis :distance_highlight="distance" />
+      <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round />
+      <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" />
     </div>
   </div>
 </template>

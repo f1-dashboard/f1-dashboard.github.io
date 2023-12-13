@@ -45,7 +45,7 @@ function cubicBezierInterpolation(x, p0, p1, p2, p3) {
 
 
 export default {
-    emits: ['distanceChanged'],
+    emits: ['DistanceChanged'],
     props: {
         distance_highlight: {
             validator(value) {
@@ -350,7 +350,7 @@ export default {
         // Update dots
         pointermoved(event) {
             const [xm, ym] = d3.pointer(event);
-            this.$emit('distanceChanged', this.x.invert(xm))
+            this.$emit('DistanceChanged', this.x.invert(xm))
 
             this.set_distance(xm, true)
         },

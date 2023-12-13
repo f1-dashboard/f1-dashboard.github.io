@@ -9,23 +9,26 @@
 import * as d3 from "d3";
 
 export default {
-    props: ['driver', 'circuit'],
+    props: ['driver', 'circuit', 'distance_highlight'],
 
     watch: {
         driver: function (newVal, oldVal) {
             console.log('Driver changed: ', newVal, ' | was: ', oldVal);
             this.visualizeTrack(newVal);
         },
-        circuit: function(newVal, oldVal) {
+        circuit: function (newVal, oldVal) {
             console.log('Circuit changed: ', newVal, ' | was: ', oldVal);
-            this.init(this.driver); 
+            this.init(this.driver);
+        },
+        distance_highlight: function (newVal, oldVal) {
+            this.updateDistancePointFromDistance(newVal)
         }
     },
 
     async mounted() {
         await this.init(this.driver)
         this.visualizeTrack(this.driver)
-        this.update(null)
+        this.updateDistancePointFromCursor(null)
     },
     methods: {
         calculateDistance(point1, point2) {
@@ -34,7 +37,7 @@ export default {
             // return Math.sqrt(dx * dx + dy * dy);
             return dx * dx + dy * dy
         },
-        update(point) {
+        updateDistancePointFromCursor(point) {
             this.circle.selectAll().remove()
 
             if (point) {
@@ -55,16 +58,29 @@ export default {
                 }
             }
         },
+        updateDistancePointFromDistance(distance) {
+            this.circle.selectAll().remove()
+
+            const closest = d3.least(this.data, d => Math.abs(distance - d.dist))
+
+            this.circle
+                .selectAll("circle")
+                .data([closest])
+                .join("circle")
+                .attr("cx", d => this.x(d.x))
+                .attr("cy", d => this.y(d.y))
+                .attr("r", 3);
+        },
+
         distanceEvent(point) {
             const closest = d3.least(this.data, d => this.calculateDistance(point, d))
             this.$emit('EmitDistance', closest.dist)
         },
-        async visualizeTrack(driver)  {
-            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {if (d.FullName == driver)
-        return d})
+        async visualizeTrack(driver) {
+            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == driver) return d })
 
-        // define color range
-        var color = d3.scaleLinear()
+            // define color range
+            var color = d3.scaleLinear()
                 .domain(d3.extent(telemetry_data, d => +d.Speed))
                 .range(["red", "blue"]);
 
@@ -72,11 +88,11 @@ export default {
                 .data(telemetry_data).enter()
                 .append("svg:line")
                 .attr("x1", (d) => this.x(d.X))
-                .attr("x2", (d, i) => telemetry_data[i+1] ? this.x(telemetry_data[i+1].X) : this.x(d.X))
+                .attr("x2", (d, i) => telemetry_data[i + 1] ? this.x(telemetry_data[i + 1].X) : this.x(d.X))
                 .attr("y1", (d) => this.y(d.Y))
-                .attr("y2", (d, i) => telemetry_data[i+1] ? this.y(telemetry_data[i+1].Y) : this.y(d.Y))
+                .attr("y2", (d, i) => telemetry_data[i + 1] ? this.y(telemetry_data[i + 1].Y) : this.y(d.Y))
                 .attr("fill", "none")
-                .attr("stroke", function(d) { return color(d.Speed) })
+                .attr("stroke", function (d) { return color(d.Speed) })
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
 
@@ -129,7 +145,7 @@ export default {
                     let [x, y] = d3.pointer(event)
                     x = this.x.invert(x)
                     y = this.y.invert(y)
-                    this.update({ x: x, y: y })
+                    this.updateDistancePointFromCursor({ x: x, y: y })
                     this.distanceEvent({ x: x, y: y })
                 })
 
@@ -149,7 +165,7 @@ export default {
                 .duration(500)
                 .ease(d3.easeLinear)
                 .attr("stroke-dasharray", `${l},${l}`);
-              
+
 
             this.circle = this.svg.append("g")
                 .attr("fill", "white")
