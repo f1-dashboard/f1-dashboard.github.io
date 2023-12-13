@@ -10,6 +10,24 @@ import * as d3 from "d3";
 
 const qualis = ['Q1', 'Q2', 'Q3']
 
+function parseTimeString(ts) {
+    const durationArray = ts.split(" ");
+
+    // Extract days, hours, minutes, seconds, and milliseconds
+    const days = parseInt(durationArray[0]);
+    const timeComponents = durationArray[2].split(":");
+    const hours = parseInt(timeComponents[0]);
+    const minutes = parseInt(timeComponents[1]);
+    const secondsArray = timeComponents[2].split(".");
+    const seconds = parseInt(secondsArray[0]);
+    const milliseconds = parseInt(secondsArray[1]) / 1000;
+    return {
+        lap_time: hours * 3600 + minutes * 60 + seconds + milliseconds / 1000,
+        time_string: `${minutes}:${seconds}.${milliseconds}`,
+    }
+}
+
+
 export default {
     props: {
         qualifying: {
@@ -121,20 +139,7 @@ export default {
                     // Parse the duration string, e.g. "0 days 00:01:20.643000"
 
                     try {
-                        const durationArray = d[q].split(" ");
-
-                        // Extract days, hours, minutes, seconds, and milliseconds
-                        const days = parseInt(durationArray[0]);
-                        const timeComponents = durationArray[2].split(":");
-                        const hours = parseInt(timeComponents[0]);
-                        const minutes = parseInt(timeComponents[1]);
-                        const secondsArray = timeComponents[2].split(".");
-                        const seconds = parseInt(secondsArray[0]);
-                        const milliseconds = parseInt(secondsArray[1]) / 1000;
-                        driver[q] = {
-                            lap_time: hours * 3600 + minutes * 60 + seconds + milliseconds / 1000,
-                            time_string: `${minutes}:${seconds}.${milliseconds}`,
-                        }
+                        driver[q] = parseTimeString(d[q])
                     } catch {
                         continue;
                     }
