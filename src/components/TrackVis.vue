@@ -2,6 +2,8 @@
     <div>
         <h2>Circuit</h2>
         <div id="trackvis"></div>
+        <input type="checkbox" id="brakingCheckbox">
+        <label for="brakingCheckbox">Show Braking</label>
     </div>
 </template>
 
@@ -80,7 +82,52 @@ export default {
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
 
-            trackvis.append(this.svg.node())
+            container.append(this.svg.node())
+        },
+
+        async drawBrakingLines(driver) {
+            const telemetry_data = await d3.csv("./data/monza_2023_fastest_laps.csv", d => {if (d.FullName == driver)
+        return d})
+            
+        let currentBrakingSection = null;
+        const brakingSections = [];
+
+        telemetry_data.forEach((data, index) => {
+            if (data.Brake == 'True') {
+                if (!currentBrakingSection) {
+                    currentBrakingSection = { start: index, end: index };
+                } else {
+                    currentBrakingSection.end = index;
+                }
+            } else {
+                if (currentBrakingSection) {
+                    brakingSections.push(currentBrakingSection);
+                    currentBrakingSection = null;
+                }
+            }
+        });
+
+        if (currentBrakingSection) {
+            brakingSections.push(currentBrakingSection);
+        }
+
+        // Draw lines for each braking section
+        brakingSections.forEach(section => {
+            const startX = telemetry_data[section.start].X;
+            const startY = telemetry_data[section.start].Y;
+            const endX = telemetry_data[section.end].X;
+            const endY = telemetry_data[section.end].Y;
+
+            this.svg.append("line")
+                .attr("class", "braking-line")
+                .attr("x1", this.x(startX))
+                .attr("y1", this.y(startY))
+                .attr("x2", this.x(endX))
+                .attr("y2", this.y(endY))
+                .attr("stroke", "black")
+                .attr("stroke-width", 15)
+                .style("stroke-opacity", 0.5);
+        });
         },
 
         async init(driver) {
@@ -132,6 +179,17 @@ export default {
                     this.update({ x: x, y: y })
                     this.distanceEvent({ x: x, y: y })
                 })
+
+                const checkbox = document.getElementById('brakingCheckbox');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        this.drawBrakingLines(this.driver);
+                    } else {
+                        // If checkbox is unchecked, remove braking lines
+                        this.svg.selectAll('.braking-line').remove();
+                    }
+                });
+
 
             const length = (path) => d3.create("svg:path").attr("d", path).node().getTotalLength()
             const l = length(this.track(this.data));
