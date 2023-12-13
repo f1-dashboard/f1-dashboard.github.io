@@ -17,6 +17,12 @@
   src: url("Formula1-Bold.otf") format("opentype")
 }
 
+@font-face {
+  font-family: formula1wide;
+  font-weight: normal;
+  src: url("Formula1-Wide.otf") format("opentype")
+}
+
 .red_bull {
   fill: #3671c6
 }

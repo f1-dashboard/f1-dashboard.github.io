@@ -57,6 +57,9 @@ export default {
         },
         relative: {
             default: false
+        },
+        circuit: {
+            default: 1
         }
     },
     watch: {
@@ -65,6 +68,9 @@ export default {
         },
         drivers: function (newVal, oldVal) {
             this.set_drivers(newVal)
+        },
+        circuit: async function (newVal, oldVal) {
+            await this.init()
         }
     },
     async mounted() {
@@ -195,8 +201,11 @@ export default {
         },
 
         async init() {
+            // Clear existing SVG element (if any)
+            d3.select('#container').selectAll('svg').remove();
+
             // Load data
-            this.data_raw = await d3.csv("../data/monza_2023_fastest_laps.csv", d => {
+            this.data_raw = await d3.csv("../data/data/" + this.circuit + "/fastest_laps.csv", d => {
                 const time = parseTimeString(d.Time).time
 
                 if (!time) {

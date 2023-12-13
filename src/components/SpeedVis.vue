@@ -75,11 +75,6 @@ export default {
         },
         circuit: async function (newVal, oldVal) {
             await this.init()
-            this.set_drivers(["Lewis Hamilton"])
-            this.set_drivers(["Carlos Sainz", "Max Verstappen"])
-            if (this.relative) {
-                this.set_relative_to("Carlos Sainz")
-            }
         },
     },
     async mounted() {
