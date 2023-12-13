@@ -3,13 +3,16 @@
         <span ref="Q1" @click="this.changeQuali('Q1')">Q1</span>
         <span ref="Q2" @click="this.changeQuali('Q2')">Q2</span>
         <span ref="Q3" @click="this.changeQuali('Q3')">Q3</span>
-        <!-- <hr ref="underline" class="underline"> -->
+        <hr ref="underline" class="underline">
     </div>
 </template>
 
 <script>
 export default {
     emits: ['QualiChanged'],
+    mounted() {
+        this.changeQuali('Q1')
+    },
     methods: {
         changeQuali(q) {
             this.$emit('QualiChanged', q)
@@ -18,9 +21,8 @@ export default {
             const targetSpan = this.$refs[q];
             const movingLine = this.$refs.underline;
             if (targetSpan && movingLine) {
-                const targetPosition = targetSpan.offsetLeft + targetSpan.offsetWidth / 2;
+                const targetPosition = targetSpan.offsetLeft;
                 console.log(targetPosition)
-                movingLine.style.transition = 'left 0.3s ease';
                 movingLine.style.left = targetPosition + 'px';
             }
         }
@@ -38,19 +40,13 @@ export default {
 
 .underline {
     width: 2.5em;
-    /* Adjust the width as needed */
     margin: 3px auto;
-    /* Adjust the top and bottom margins to control the position */
     color: red;
-    /* Line color */
     background-color: red;
-    /* Line color for older browsers */
     height: 5px;
-    /* Line thickness */
-    /* transition: transform 0.3s ease; */
-    position: relative;
+    position: absolute;
     transition: left 0.3s ease;
     left: 0;
-    /* Smooth transition for the transform property */
+    border-radius: 2px;
 }
 </style>
