@@ -20,7 +20,11 @@ function parseTimeString(ts) {
     const minutes = parseInt(timeComponents[1]);
     const secondsArray = timeComponents[2].split(".");
     const seconds = parseInt(secondsArray[0]);
-    const milliseconds = parseInt(secondsArray[1]) / 1000;
+    let milliseconds = 0;
+    if (secondsArray[1]) {
+        milliseconds = parseInt(secondsArray[1]) / 1000;
+    }
+
     return {
         lap_time: hours * 3600 + minutes * 60 + seconds + milliseconds / 1000,
         time_string: `${minutes}:${seconds}.${milliseconds}`,
@@ -206,6 +210,7 @@ export default {
                 relativeTime = d3.min(driversInQuali, d => d[quali].lap_time)
             }
             driversInQuali.forEach(d => d.delta = (d[quali].lap_time - relativeTime))
+            console.log(driversInQuali)
             return d3.sort(driversInQuali, d => d.delta)
         }
     }
