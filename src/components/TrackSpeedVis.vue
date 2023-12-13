@@ -45,6 +45,7 @@ function cubicBezierInterpolation(x, p0, p1, p2, p3) {
 
 
 export default {
+    emits: ['distanceChanged'],
     props: {
         distance_highlight: {
             validator(value) {
@@ -73,7 +74,7 @@ export default {
     async mounted() {
         await this.init()
         this.set_drivers(["Lewis Hamilton"])
-        this.set_drivers(["Carlos Sainz", "Max Verstappen"])
+        this.set_drivers(["Carlos Sainz", "Lance Stroll"])
         if (this.relative) {
             this.set_relative_to("Carlos Sainz")
         }
@@ -89,9 +90,8 @@ export default {
             const interpreted_points = d3.zip(d3.quantize(dist, n), d3.quantize(speed, n))
 
 
-            // const interp = new CurveInterpolator(this.filtered_data.get(driver).map(d => [d[4], d[5]]), { tension: 0.2, alpha: 0.5 });
-            // const max_dist = d3.max(this.filtered_data.get(driver))
-            // console.log(interp)
+            const interp = new CurveInterpolator(this.filtered_data.get(driver).map(d => [d[4], d[5]]), { tension: 0.2, alpha: 0.5 });
+            const max_dist = d3.max(this.filtered_data.get(driver).map(d => d[4]))
 
             let relative_data = new Map()
             for (const [name, driver_data] of this.filtered_data) {
@@ -102,7 +102,7 @@ export default {
                     // this is really annoying. driver_data should just be mapping of name to dist/speed. use this.x() to get x value
                     const [x, y, name, team, dist, speed] = point
                     // get the interpolated dist, speed from the relative drive
-                    const relativeSpeed = this.get_interpolated_speed(driver, dist) - speed
+                    const relativeSpeed = speed - this.get_interpolated_speed(driver, dist)
                     relativeSpeedLinear.push([x, this.y(relativeSpeed)])
                 }
 
@@ -112,24 +112,28 @@ export default {
                 let i_speed = d3.interpolateBasis(this.filtered_data.get(name).map(d => d[5]))
                 const i_points = d3.zip(d3.quantize(i_dist, n), d3.quantize(i_speed, n))
                 const relativeSpeedBasis = i_points.map((d, i) => {
-                    return [this.x(d[0]), this.y(interpreted_points[i][1] - d[1])]
+                    return [this.x(d[0]), this.y(d[1] - interpreted_points[i][1])]
                 }
                 )
 
-                // const relativeSpeedCurve = this.filtered_data.get(name).map(d => [this.x(d[4]), this.y(interp.getPointAt(d[4] / max_dist) - d[5])])
-                // relativeSpeedCurve["full_name"] = name
-                // relativeSpeedCurve["team"] = driver_data.team
+                const relativeSpeedCurve = this.filtered_data.get(name).map(d => {
+                    // console.log(interp.getPointAt(d[4] / max_dist)[0], d[4])
+                    return [this.x(d[4]), this.y(d[5] - interp.getPointAt(d[4] / max_dist)[1])]
+                })
+                relativeSpeedCurve["full_name"] = name
+                relativeSpeedCurve["team"] = driver_data.team
 
                 relativeSpeedBasis["full_name"] = name
                 relativeSpeedBasis["team"] = driver_data.team
-                console.log(relativeSpeedBasis)
+                // console.log(relativeSpeedBasis)
 
-                console.log(relativeSpeedLinear)
+                // console.log(relativeSpeedLinear)
                 relativeSpeedLinear["full_name"] = name
                 relativeSpeedLinear["team"] = driver_data.team
 
                 // relative_data.set(name, relativeSpeedCurve)
-                relative_data.set(name, relativeSpeedBasis)
+                // TODO: apply smoothing
+                relative_data.set(name, relativeSpeedLinear)
                 // relative_data.set(name, relativeSpeedLinear)
             }
 
@@ -349,6 +353,7 @@ export default {
         // Update dots
         pointermoved(event) {
             const [xm, ym] = d3.pointer(event);
+            this.$emit('distanceChanged', this.x.invert(xm))
 
             this.set_distance(xm, true)
         },
