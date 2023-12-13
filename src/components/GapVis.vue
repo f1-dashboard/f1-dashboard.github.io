@@ -226,7 +226,7 @@ export default {
             const marginBottom = 30;
             const marginLeft = 30;
             const width = 640;
-            const height = 400;
+            const height = 200;
 
             this.maxX = d3.max(this.data_raw, d => d.dist)
             // Declare the scales
