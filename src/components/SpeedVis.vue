@@ -241,25 +241,6 @@ export default {
                 }
             }
 
-            // const line = d3.line()
-            //     .x((d) => d[0])
-            //     .y((d) => d[1])
-            //     .curve(d3.curveCatmullRom.alpha(0.5))
-
-            // console.log(line)
-
-            // console.log([0])
-            // console.log(line(this.filtered_data.get(drivers[0])));
-
-            // const n = 40
-            // const dist = d3.interpolateBasis(this.filtered_data.get(drivers[0]).map(d => d[0]))
-            // const speed = d3.interpolateBasis(this.filtered_data.get(drivers[0]).map(d => d[1]))
-
-            // // return {
-            // //     type: "LineString",
-            // const coordinates = d3.zip(d3.quantize(dist, n), d3.quantize(speed, n))
-            // console.log(coordinates)
-
 
             this.driver_lines
                 .selectAll("path")
@@ -357,11 +338,13 @@ export default {
 
             this.svg
                 .on("pointermove", this.pointermoved)
-                .on("pointerenter", this.showDistanceLine)
+                // .on("pointerenter", this.showDistanceLine)
                 // .on("pointerleave", this.hideDistanceLine)
                 .on("touchstart", event => event.preventDefault());
 
-                trackspeedvis.append(this.svg.node())
+            this.showDistanceLine();
+
+            trackspeedvis.append(this.svg.node())
         },
 
         // Update dots
