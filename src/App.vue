@@ -1,14 +1,15 @@
 <script setup>
 import QualifyingResult from './components/QualifyingResult.vue'
 import TrackVis from './components/TrackVis.vue'
-import TrackSpeedVis from './components/TrackSpeedVis.vue'
+import SpeedVis from './components/SpeedVis.vue'
 import RaceDropdown from './components/RaceDropdown.vue'
 import { ref } from 'vue'
 import InfoCard from './components/InfoCard.vue'
+import GapVis from './components/GapVis.vue'
 
 let category = ref("Q1")
 let distance = ref(1)
-let driver = ref("Carlos Sainz")
+let drivers = ref(["Carlos Sainz"])
 let round = ref(1)
 
 const updateRound = (newRound) => {
@@ -21,19 +22,20 @@ const updateRound = (newRound) => {
   <div class="header">
     <RaceDropdown @round-selected="updateRound"></RaceDropdown>
   </div>
-  
+
   <div class="content">
     <div class="left">
-      <QualifyingResult :qualifying=category :circuit=round @EmitDriver="(n) => driver = n" />
-      <InfoCard id="ic" :driver=driver />
+      <QualifyingResult :qualifying=category :circuit=round @EmitDriver="(n) => drivers = [n]" />
+      <InfoCard id="ic" :drivers=drivers />
     </div>
 
     <div class="center">
-      <TrackVis :driver=driver :circuit=round @EmitDistance="(n) => distance = n" />
+      <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance" />
     </div>
 
     <div class="right">
-      <TrackSpeedVis :distance_highlight="distance" :circuit=round />
+      <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
+      <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :drivers="drivers" />
     </div>
   </div>
 </template>
@@ -46,12 +48,12 @@ const updateRound = (newRound) => {
 }
 
 .content {
-  display: grid; 
-  grid-template-columns: 1fr 1fr 1fr; 
-  gap: 3px; 
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3px;
 }
 
-.content > div {
+.content>div {
   text-align: center;
   overflow: auto;
 }
