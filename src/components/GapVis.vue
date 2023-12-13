@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Monza Circuit</h2>
+        <h2>Gap</h2>
         <div id="container"></div>
     </div>
 </template>
@@ -130,8 +130,6 @@ export default {
                         .attr("x", -8)
                 }
             }
-
-            // Emit event
         },
 
         get_interpolated_time(driver, dist) {
@@ -154,6 +152,9 @@ export default {
         },
 
         set_drivers(drivers) {
+            if (!this.data) {
+                return
+            }
             // compute gap
             let maxGap = 0.1
 

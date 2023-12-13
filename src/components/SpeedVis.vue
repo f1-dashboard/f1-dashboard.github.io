@@ -71,7 +71,7 @@ export default {
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
-            this.set_drivers(neVal)
+            this.set_drivers(newVal)
         },
         circuit: async function (newVal, oldVal) {
             await this.init()
@@ -233,6 +233,9 @@ export default {
         },
 
         set_drivers(drivers) {
+            if (!this.pixel_data) {
+                return
+            }
             this.filtered_data = new Map();
             for (const driver_data of this.pixel_data.values()) {
                 if (drivers.includes(driver_data.full_name)) {

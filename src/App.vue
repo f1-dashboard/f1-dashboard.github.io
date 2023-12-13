@@ -9,7 +9,7 @@ import GapVis from './components/GapVis.vue'
 
 let category = ref("Q1")
 let distance = ref(1)
-let driver = ref("Carlos Sainz")
+let drivers = ref(["Carlos Sainz"])
 let round = ref(1)
 
 const updateRound = (newRound) => {
@@ -25,17 +25,17 @@ const updateRound = (newRound) => {
 
   <div class="content">
     <div class="left">
-      <QualifyingResult :qualifying=category :circuit=round @EmitDriver="(n) => driver = n" />
-      <InfoCard id="ic" :driver=driver />
+      <QualifyingResult :qualifying=category :circuit=round @EmitDriver="(n) => drivers = [n]" />
+      <InfoCard id="ic" :drivers=drivers />
     </div>
 
     <div class="center">
-      <TrackVis :driver=driver :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance" />
+      <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance" />
     </div>
 
     <div class="right">
-      <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round />
-      <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" />
+      <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
+      <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :drivers="drivers" />
     </div>
   </div>
 </template>

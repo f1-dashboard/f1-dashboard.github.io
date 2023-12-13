@@ -9,16 +9,16 @@
 import * as d3 from "d3";
 
 export default {
-    props: ['driver', 'circuit', 'distance_highlight'],
+    props: ['drivers', 'circuit', 'distance_highlight'],
 
     watch: {
-        driver: function (newVal, oldVal) {
-            console.log('Driver changed: ', newVal, ' | was: ', oldVal);
+        drivers: function (newVal, oldVal) {
+            console.log('drivers changed: ', newVal, ' | was: ', oldVal);
             this.visualizeTrack(newVal);
         },
         circuit: function (newVal, oldVal) {
             console.log('Circuit changed: ', newVal, ' | was: ', oldVal);
-            this.init(this.driver);
+            this.init(this.drivers);
         },
         distance_highlight: function (newVal, oldVal) {
             this.updateDistancePointFromDistance(newVal)
@@ -26,8 +26,8 @@ export default {
     },
 
     async mounted() {
-        await this.init(this.driver)
-        this.visualizeTrack(this.driver)
+        await this.init(this.drivers)
+        this.visualizeTrack(this.drivers)
         this.updateDistancePointFromCursor(null)
     },
     methods: {
@@ -47,7 +47,7 @@ export default {
 
                 const distance = Math.sqrt(this.calculateDistance(point, closest));
 
-                if (distance < 2000) {
+                if (distance < 500) {
                     this.circle
                         .selectAll("circle")
                         .data([closest])
@@ -76,8 +76,8 @@ export default {
             const closest = d3.least(this.data, d => this.calculateDistance(point, d))
             this.$emit('EmitDistance', closest.dist)
         },
-        async visualizeTrack(driver) {
-            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == driver) return d })
+        async visualizeTrack(drivers) {
+            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == drivers[0]) return d })
 
             // define color range
             var color = d3.scaleLinear()
@@ -99,7 +99,7 @@ export default {
             trackvis.append(this.svg.node())
         },
 
-        async init(driver) {
+        async init(drivers) {
             // Clear existing SVG element (if any)
             d3.select('#trackvis').selectAll('svg').remove();
 
