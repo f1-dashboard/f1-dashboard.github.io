@@ -36,6 +36,15 @@ export default {
             // return Math.sqrt(dx * dx + dy * dy);
             return dx * dx + dy * dy
         },
+        calculateDx(startX, startY, endX, endY) {
+            const dx =  (endX - startX) / (Math.sqrt((endX-startX)**2 + (endY-startY)**2))
+            return dx
+        },
+        calculateDy(startX, startY, endX, endY) {
+            const dy =  (endY - startY) / (Math.sqrt((endX-startX)**2 + (endY-startY)**2))
+            return dy
+        },
+
         update(point) {
             this.circle.selectAll().remove()
 
@@ -118,12 +127,16 @@ export default {
             const endX = telemetry_data[section.end].X;
             const endY = telemetry_data[section.end].Y;
 
+            const dx = this.calculateDx(startX, endX, startY, endY)
+            const dy = this.calculateDy(startX, endX, startY, endY)
+     
+
             this.svg.append("line")
                 .attr("class", "braking-line")
-                .attr("x1", this.x(startX))
-                .attr("y1", this.y(startY))
-                .attr("x2", this.x(endX))
-                .attr("y2", this.y(endY))
+                .attr("x1", this.x(startX)+10*dy)
+                .attr("y1", this.y(startY)-10*dx)
+                .attr("x2", this.x(endX)+10*dy)
+                .attr("y2", this.y(endY)-10*dx)
                 .attr("stroke", "black")
                 .attr("stroke-width", 15)
                 .style("stroke-opacity", 0.5);
@@ -152,7 +165,7 @@ export default {
 
             // Declare the x (horizontal position) scale.
             this.x = d3.scaleLinear()
-                .domain(extent_x).nice()
+                .domain([extent_x[0]-5, extent_x[1]+5]).nice()
                 .range([marginLeft, width - marginRight])
 
             // Declare the y (vertical position) scale.
