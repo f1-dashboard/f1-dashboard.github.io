@@ -280,9 +280,11 @@ export default {
 
             this.svg
                 .on("pointermove", this.pointermoved)
-                .on("pointerenter", this.showDistanceLine)
+                // .on("pointerenter", this.showDistanceLine)
                 // .on("pointerleave", this.hideDistanceLine)
                 .on("touchstart", event => event.preventDefault());
+
+            this.showDistanceLine()
 
             container.append(this.svg.node())
         },

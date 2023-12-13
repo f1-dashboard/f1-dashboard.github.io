@@ -5,6 +5,7 @@ import SpeedVis from './components/SpeedVis.vue'
 import RaceDropdown from './components/RaceDropdown.vue'
 import { ref } from 'vue'
 import InfoCard from './components/InfoCard.vue'
+import GapVis from './components/GapVis.vue'
 
 let category = ref("Q1")
 let distance = ref(1)
@@ -34,6 +35,7 @@ const updateRound = (newRound) => {
 
     <div class="right">
       <SpeedVis :distance_highlight="distance" :circuit=round />
+      <GapVis :distance_highlight="distance" />
     </div>
   </div>
 </template>
