@@ -34,7 +34,7 @@ export default {
 <style scoped>
 #menu>span {
     font-size: x-large;
-    margin: 0 10px;
+    margin: 0 30px;
     cursor: pointer;
 }
 

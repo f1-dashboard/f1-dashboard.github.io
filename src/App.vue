@@ -34,13 +34,15 @@ const updateRound = (newRound) => {
 
     <div class="center">
       <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance" />
-      <QualifyingSelector @QualiChanged="q => quali = q" />
     </div>
 
     <div class="right">
       <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
       <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
     </div>
+  </div>
+  <div id="qs">
+    <QualifyingSelector @QualiChanged="q => quali = q" />
   </div>
 </template>
 
@@ -64,6 +66,10 @@ const updateRound = (newRound) => {
 
 #ic {
   margin-top: 20px;
+}
+
+#qs {
+  text-align: center;
 }
 
 /* 

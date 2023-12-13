@@ -1,6 +1,5 @@
 <template>
     <div>
-        <h2>{{ qualifying }} Results</h2>
         <div id="qual"></div>
     </div>
 </template>
