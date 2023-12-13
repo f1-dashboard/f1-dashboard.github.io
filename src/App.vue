@@ -65,5 +65,10 @@ const updateRound = (newRound) => {
 #ic {
   margin-top: 20px;
 }
+
+/* 
+#quali {
+  margin-top: 100px;
+} */
 </style>
 

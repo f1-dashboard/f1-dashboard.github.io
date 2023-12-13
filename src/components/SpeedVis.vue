@@ -267,8 +267,8 @@ export default {
             // Declare the chart dimensions and margins.
             const marginTop = 20;
             const marginRight = 20;
-            const marginBottom = 30;
-            const marginLeft = 30;
+            const marginBottom = 40;
+            const marginLeft = 40;
             const width = 640;
             const height = 350;
 
@@ -328,10 +328,24 @@ export default {
                 .attr("stroke-linecap", "round")
 
 
+            // Axis Labels
+            this.svg.append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width - 10)
+                .attr("y", height - 10)
+                .text("distance along track (m)");
+
+            this.svg.append("text")
+                .attr("class", "y label")
+                .attr("text-anchor", "end")
+                .attr("y", 6)
+                .attr("transform", "rotate(-90)")
+                .text("speed (km/h)");
+
             // Add an invisible layer for the interactive tip.
             this.dots = this.svg.append("g")
                 .attr("display", "none");
-
 
 
             this.svg
