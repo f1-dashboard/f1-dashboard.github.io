@@ -3,7 +3,7 @@
         <h2>Circuit</h2>
         <div id="trackvis"></div>
         <input type="checkbox" id="brakingCheckbox">
-        <label for="brakingCheckbox">Show Braking</label>
+        <label for="brakingCheckbox"> Show Braking</label>
     </div>
 </template>
 
@@ -16,11 +16,12 @@ export default {
     watch: {
         drivers: function (newVal, oldVal) {
             console.log('drivers changed: ', newVal, ' | was: ', oldVal);
-            this.visualizeTrack(newVal);
+            this.visualizeTrack();
+            this.drawBrakingLines()
         },
         circuit: function (newVal, oldVal) {
             console.log('Circuit changed: ', newVal, ' | was: ', oldVal);
-            this.init(this.drivers);
+            this.init();
         },
         distance_highlight: function (newVal, oldVal) {
             this.updateDistancePoint(newVal)
@@ -28,8 +29,8 @@ export default {
     },
 
     async mounted() {
-        await this.init(this.drivers)
-        this.visualizeTrack(this.drivers)
+        await this.init()
+        this.visualizeTrack()
     },
     methods: {
         calculateDistance(point1, point2) {
@@ -65,8 +66,8 @@ export default {
             const closest = d3.least(this.data, d => this.calculateDistance(point, d))
             this.$emit('EmitDistance', closest.dist)
         },
-        async visualizeTrack(drivers) {
-            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == drivers[0]) return d })
+        async visualizeTrack() {
+            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == this.drivers[0]) return d })
 
             // define color range
             var color = d3.scaleLinear()
@@ -74,10 +75,8 @@ export default {
                 .range(["red", "blue"]);
 
             this.speedLine.selectAll('line').remove()
-            // this.svg.selectAll('line').remove()
 
             this.speedLine.selectAll('line')
-                // this.svg.selectAll('line')
                 .data(telemetry_data).enter()
                 .append("svg:line")
                 .attr("x1", (d) => this.x(d.X))
@@ -88,13 +87,11 @@ export default {
                 .attr("stroke", function (d) { return color(d.Speed) })
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
-
-            // container.append(this.svg.node())
         },
 
-        async drawBrakingLines(driver) {
+        async drawBrakingLines() {
             const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
-                if (d.FullName == driver)
+                if (d.FullName == this.drivers[0])
                     return d
             })
 
@@ -143,7 +140,7 @@ export default {
         });
         },
 
-        async init(drivers) {
+        async init() {
             // Clear existing SVG element (if any)
             d3.select('#trackvis').selectAll('svg').remove();
 
@@ -219,7 +216,7 @@ export default {
                 .datum(this.data)
                 .attr("fill", "none")
                 .attr("stroke", "black")
-                .attr("stroke-width", 2.5)
+                .attr("stroke-width", 5)
                 .attr("stroke-linejoin", "round")
                 .attr("stroke-linecap", "round")
                 .attr("stroke-dasharray", `0,${l}`)
