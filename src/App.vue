@@ -29,7 +29,7 @@ const updateRound = (newRound) => {
   <div class="content">
     <div class="left">
       <InfoCard id="ic" :drivers=drivers />
-      <QualifyingResult :qualifying=quali :circuit=round @EmitDriver="(n) => drivers = [n]" />
+      <QualifyingResult :qualifying=quali :circuit=round @EmitDriver="(n) => drivers = n" />
     </div>
 
     <div class="center">

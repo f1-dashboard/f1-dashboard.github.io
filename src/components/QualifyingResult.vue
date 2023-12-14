@@ -62,8 +62,8 @@ export default {
             const drivers = this.getDriverData(this.qualifying, relativeTo)
             const format = d3.format("+.3")
             const eps = 0.0000001
-
-            this.$emit('EmitDriver', relativeTo)
+            // This is temporary to see two drivers, should be removed when you can select two drivers
+            this.$emit('EmitDriver', [relativeTo, "Carlos Sainz"])
 
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))

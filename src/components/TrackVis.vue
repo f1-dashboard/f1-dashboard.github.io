@@ -71,13 +71,15 @@ export default {
         },
         async visualizeTrack() {
             const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == this.drivers[0]) return d })
+            const speed_domain = d3.extent(telemetry_data, d => +d.Speed)
 
             // define color range
             var color = d3.scaleLinear()
-                .domain(d3.extent(telemetry_data, d => +d.Speed))
-                .range(["red", "blue"]);
+                .domain(speed_domain)
+                .range(["red", "#eac0a0"]);
 
             this.speedLine.selectAll('line').remove()
+            this.speedLine.selectAll('text').remove()
 
             this.speedLine.selectAll('line')
                 .data(telemetry_data).enter()
@@ -90,6 +92,53 @@ export default {
                 .attr("stroke", function (d) { return color(d.Speed) })
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
+
+                // Create legend
+                //Append a defs (for definition) element to  SVG
+                var defs = this.speedLine.append("defs");
+
+                //Append a linearGradient element to the defs and give it a unique id
+                var linearGradient = defs.append("linearGradient")
+                    .attr("id", "linear-gradient");
+
+                //Horizontal gradient
+                linearGradient
+                    .attr("x1", "0%")
+                    .attr("y1", "0%")
+                    .attr("x2", "100%")
+                    .attr("y2", "0%");
+
+                //Set the color for the start (0%)
+                linearGradient.append("stop")
+                    .attr("offset", "0%")
+                    .attr("stop-color", "red"); //red
+
+                //Set the color for the end (100%)
+                linearGradient.append("stop")
+                    .attr("offset", "100%")
+                    .attr("stop-color", "#eac0a0"); //off-white
+
+                const legend = this.speedLine.append("g")
+                    .attr("class", "legend")
+                    .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 20 - 20})`)
+                
+                //Draw the rectangle and fill with gradient
+                legend.append("rect")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", 150)
+                    .attr("height", 20)
+                    .style("fill", "url(#linear-gradient)");
+
+                // Add text for speed range
+                const speedRangeText = legend.append("text")
+                    .attr("x", 0)
+                    .attr("y", 30) // Adjust the vertical position as needed
+                    .attr("font-size", "12px") // Set the font size
+                    .attr("fill", "black"); // Set the text color
+
+                // Update the text content to display the speed range
+                speedRangeText.text(`Speed Range: ${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])}`);
         },
 
         async drawBrakingLines() {
@@ -110,9 +159,31 @@ export default {
                         .attr("y2", telemetry_data[index + 1] ? this.y(telemetry_data[index + 1].Y) : this.y(data.Y))
                         .attr("stroke", "#ffa600")
                         .attr("stroke-width", 15)
-                        .attr("stroke-linecap", "round")
+                        .attr("stroke-linecap", "square")
+                        .attr("opacity", 1)
                 }
             });
+
+            if (this.drivers.length == 2){
+                const telemetry_data_2 = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
+                if (d.FullName == this.drivers[1])
+                    return d
+                });
+                telemetry_data_2.forEach((data, index) => {
+                if (data.Brake == 'True') {
+                    this.brakeLine.append("line")
+                        .attr("class", "braking-line")
+                        .attr("x1", this.x(data.X))
+                        .attr("y1", this.y(data.Y))
+                        .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
+                        .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
+                        .attr("stroke", "green")
+                        .attr("stroke-width", 15)
+                        .attr("stroke-linecap", "square")
+                        .attr("opacity", 0.1)
+                }
+            });
+            }
         },
 
         async init() {
@@ -130,7 +201,7 @@ export default {
             // Declare the chart dimensions and margins.
             const marginTop = 20;
             const marginRight = 100;
-            const marginBottom = 30;
+            const marginBottom = 50;
             const marginLeft = 100;
             const width = 640;
             const height = width * (extent_y[1] - extent_y[0]) / (extent_x[1] - extent_x[0]);
@@ -210,10 +281,6 @@ export default {
                 .attr("fill", "white")
                 .attr("stroke", "black")
                 .attr("stroke-width", 2)
-
-
-
-
 
             trackvis.append(this.svg.node())
         },
