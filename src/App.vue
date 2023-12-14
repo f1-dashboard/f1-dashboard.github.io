@@ -55,7 +55,7 @@ const updateRound = (newRound) => {
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1.2fr 1fr;
   gap: 3px;
 }
 
