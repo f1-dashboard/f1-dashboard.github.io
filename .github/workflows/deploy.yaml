@@ -11,6 +11,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
 
     steps:
       - uses: actions/checkout@v3
@@ -26,4 +29,4 @@ jobs:
           git init
           git add -A
           git commit -m 'GH Pages deployment'
-          git push -f https://lucasvanmol:${{ secrets.GITHUB_TOKEN }}@github.com/f1-dashboard/f1-dashboard.github.io.git master:gh-pages
+          git push -f https://f1-dashboard:${{ secrets.GITHUB_TOKEN }}@github.com/f1-dashboard/f1-dashboard.github.io.git master:gh-pages
