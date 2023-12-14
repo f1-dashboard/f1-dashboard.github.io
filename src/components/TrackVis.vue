@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Circuit</h2>
+        <h2>Speed on circuit {{ drivers[0] }}</h2>
         <div id="trackvis"></div>
         <input type="checkbox" id="brakingCheckbox">
         <label for="brakingCheckbox"> Show Braking</label>
