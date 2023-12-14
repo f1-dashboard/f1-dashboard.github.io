@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run a multi-line script
+        run: |
+          npm ci
+          npm run build
+          cd dist
+          ln -s index.html 404.html
+          git config --global user.email "CI@example.com"
+          git config --global user.name "CI"
+          git init
+          git add -A
+          git commit -m 'GH Pages deployment'
+          git push -f https://f1-dashboard:${{ secrets.GITHUB_TOKEN }}@github.com/f1-dashboard/f1-dashboard.github.io.git master:gh-pages
