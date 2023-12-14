@@ -17,7 +17,10 @@ export default {
         drivers: function (newVal, oldVal) {
             console.log('drivers changed: ', newVal, ' | was: ', oldVal);
             this.visualizeTrack();
-            this.drawBrakingLines()
+            const checkbox = document.getElementById('brakingCheckbox');
+            if (checkbox.checked) {
+                this.drawBrakingLines()
+            }
         },
         circuit: function (newVal, oldVal) {
             console.log('Circuit changed: ', newVal, ' | was: ', oldVal);
@@ -95,49 +98,21 @@ export default {
                     return d
             })
 
-            let currentBrakingSection = null;
-            const brakingSections = [];
+            this.svg.selectAll('.braking-line').remove();
 
             telemetry_data.forEach((data, index) => {
                 if (data.Brake == 'True') {
-                    if (!currentBrakingSection) {
-                        currentBrakingSection = { start: index, end: index };
-                    } else {
-                        currentBrakingSection.end = index;
-                    }
-                } else {
-                    if (currentBrakingSection) {
-                        brakingSections.push(currentBrakingSection);
-                        currentBrakingSection = null;
-                    }
+                    this.brakeLine.append("line")
+                        .attr("class", "braking-line")
+                        .attr("x1", this.x(data.X))
+                        .attr("y1", this.y(data.Y))
+                        .attr("x2", telemetry_data[index + 1] ? this.x(telemetry_data[index + 1].X) : this.x(data.X))
+                        .attr("y2", telemetry_data[index + 1] ? this.y(telemetry_data[index + 1].Y) : this.y(data.Y))
+                        .attr("stroke", "#ffa600")
+                        .attr("stroke-width", 15)
+                        .attr("stroke-linecap", "round")
                 }
             });
-
-            if (currentBrakingSection) {
-                brakingSections.push(currentBrakingSection);
-            }
-
-        // Draw lines for each braking section
-        brakingSections.forEach(section => {
-            const startX = telemetry_data[section.start].X;
-            const startY = telemetry_data[section.start].Y;
-            const endX = telemetry_data[section.end].X;
-            const endY = telemetry_data[section.end].Y;
-
-            const dx = this.calculateDx(startX, endX, startY, endY)
-            const dy = this.calculateDy(startX, endX, startY, endY)
-     
-
-            this.svg.append("line")
-                .attr("class", "braking-line")
-                .attr("x1", this.x(startX)+10*dy)
-                .attr("y1", this.y(startY)-10*dx)
-                .attr("x2", this.x(endX)+10*dy)
-                .attr("y2", this.y(endY)-10*dx)
-                .attr("stroke", "black")
-                .attr("stroke-width", 15)
-                .style("stroke-opacity", 0.5);
-        });
         },
 
         async init() {
@@ -226,6 +201,8 @@ export default {
                 .ease(d3.easeLinear)
                 .attr("stroke-dasharray", `${l},${l}`);
 
+            this.brakeLine = this.svg.append("g")
+
             // draw speed 
             this.speedLine = this.svg.append("g")
 
@@ -233,6 +210,8 @@ export default {
                 .attr("fill", "white")
                 .attr("stroke", "black")
                 .attr("stroke-width", 2)
+
+
 
 
 
