@@ -63,7 +63,12 @@ export default {
             const format = d3.format("+.3")
             const eps = 0.0000001
 
-            this.$emit('EmitDriver', relativeTo)
+            if (!relativeTo) {
+                relativeTo = drivers[0].full_name
+            }
+            // ensure other components are loaded before emitting driver event
+            setTimeout(() =>
+                this.$emit('EmitDriver', relativeTo), 100)
 
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))
