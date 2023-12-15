@@ -178,9 +178,9 @@ export default {
                         .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
                         .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
                         .attr("stroke", "green")
-                        .attr("stroke-width", 15)
+                        .attr("stroke-width", 10)
                         .attr("stroke-linecap", "square")
-                        .attr("opacity", 0.1)
+                        .attr("opacity", 1)
                 }
             });
             }
