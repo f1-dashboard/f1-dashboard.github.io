@@ -161,14 +161,12 @@ export default {
             if (!this.data) {
                 return
             }
-            // compute gap
-            let maxGap = 0.1
 
+            // compute gap between drivers
+            let maxGap = 0.1
             this.relative_data_px = new Map()
             for (let i = 0; i < drivers.length; i++) {
-                const this_max_dist = d3.max(this.data.get(drivers[i]).map(d => d[0]))
-
-                const relativeSpeedCurve = this.data.get(drivers[i]).map(d => {
+                const gapData = this.data.get(drivers[i]).map(d => {
                     const gap = this.get_interpolated_time(drivers[0], d[0]) - d[1]
 
                     if (gap > maxGap) {
@@ -177,17 +175,21 @@ export default {
                         maxGap = -gap
                     }
 
-                    // convert to pixel space
-                    return [this.x(d[0]), this.y(gap)]
+                    return [d[0], gap]
                 })
 
-                relativeSpeedCurve["full_name"] = drivers[i]
-                relativeSpeedCurve["team"] = this.data.get(drivers[i]).team
-
-                this.relative_data_px.set(drivers[i], relativeSpeedCurve)
+                this.relative_data_px.set(drivers[i], gapData)
             }
 
             this.y.domain([-maxGap, maxGap])
+
+            // convert gap data to pixel space
+            for (const driver of this.relative_data_px) {
+                const gapPXdata = this.relative_data_px.get(driver[0]).map(([x, y]) => [this.x(x), this.y(y)])
+                gapPXdata["full_name"] = driver[0]
+                gapPXdata["team"] = this.data.get(driver[0]).team
+                this.relative_data_px.set(driver[0], gapPXdata)
+            }
 
             this.gy.call(d3.axisLeft(this.y));
 
