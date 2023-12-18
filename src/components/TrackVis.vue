@@ -118,12 +118,12 @@ export default {
                     .attr("offset", "100%")
                     .attr("stop-color", "#eac0a0"); //off-white
 
-                const legend = this.speedLine.append("g")
+                const legendSpeed = this.speedLine.append("g")
                     .attr("class", "legend")
-                    .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 20 - 20})`)
+                    .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 50})`)
                 
                 //Draw the rectangle and fill with gradient
-                legend.append("rect")
+                legendSpeed.append("rect")
                     .attr("x", 0)
                     .attr("y", 0)
                     .attr("width", 150)
@@ -131,14 +131,14 @@ export default {
                     .style("fill", "url(#linear-gradient)");
 
                 // Add text for speed range
-                const speedRangeText = legend.append("text")
+                const speedRangeText = legendSpeed.append("text")
                     .attr("x", 0)
-                    .attr("y", 30) // Adjust the vertical position as needed
-                    .attr("font-size", "12px") // Set the font size
-                    .attr("fill", "black"); // Set the text color
+                    .attr("y", 35) // relative to legend
+                    .attr("font-size", "12px") 
+                    .attr("fill", "black"); 
 
                 // Update the text content to display the speed range
-                speedRangeText.text(`Speed Range: ${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])}`);
+                speedRangeText.text(`${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])} km/h`);
         },
 
         async drawBrakingLines() {
@@ -148,6 +148,7 @@ export default {
             })
 
             this.svg.selectAll('.braking-line').remove();
+            this.svg.selectAll('.legend-braking-line').remove();
 
             telemetry_data.forEach((data, index) => {
                 if (data.Brake == 'True') {
@@ -163,6 +164,25 @@ export default {
                         .attr("opacity", 1)
                 }
             });
+
+            const legendDrivers = this.speedLine.append("g")
+                    .attr("class", "legend-braking-line")
+                    .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
+
+                legendDrivers.append("rect")
+                    .attr("x", 0)
+                    .attr("y", 0)
+                    .attr("width", 20)
+                    .attr("height", 20)
+                    .style("fill", "yellow");
+
+                const LegendDriversText2 = legendDrivers.append("text")
+                    .attr("x", 35)
+                    .attr("y", 45) // relative to legend
+                    .attr("font-size", "12px") 
+                    .attr("fill", "black"); 
+
+                LegendDriversText2.text(`${this.drivers[1]}`);
 
             if (this.drivers.length == 2){
                 const telemetry_data_2 = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
@@ -183,6 +203,20 @@ export default {
                         .attr("opacity", 1)
                 }
             });
+            legendDrivers.append("rect")
+                    .attr("x", 0)
+                    .attr("y", 30)
+                    .attr("width", 20)
+                    .attr("height", 20)
+                    .style("fill", "green");
+
+                const LegendDriversText1 = legendDrivers.append("text")
+                    .attr("x", 35)
+                    .attr("y", 15) // relative to legend
+                    .attr("font-size", "12px") 
+                    .attr("fill", "black"); 
+
+                    LegendDriversText1.text(`${this.drivers[0]}`);
             }
         },
 
@@ -247,10 +281,11 @@ export default {
             const checkbox = document.getElementById('brakingCheckbox');
             checkbox.addEventListener('change', () => {
                 if (checkbox.checked) {
-                    this.drawBrakingLines(this.driver);
+                    this.drawBrakingLines();
                 } else {
                     // If checkbox is unchecked, remove braking lines
                     this.svg.selectAll('.braking-line').remove();
+                    this.svg.selectAll('.legend-braking-line').remove();
                 }
             });
 
