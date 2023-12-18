@@ -47,7 +47,7 @@ export default {
 .dropdown {
   text-align: center;
   font-weight: bold;
-  /* font-family: formula1wide; */
+  font-family: 'formula1';
   /* Align text for the select box */
 }
 

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Speed on track</h2>
+        <h2>Driver speed along track</h2>
         <div id="trackspeedvis"></div>
     </div>
 </template>

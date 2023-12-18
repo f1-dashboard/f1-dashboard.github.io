@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Speed on circuit {{ drivers[0] }}</h2>
+        <h2>{{ drivers[0] }}'s fastest lap</h2>
         <div id="trackvis"></div>
         <input type="checkbox" id="brakingCheckbox">
         <label for="brakingCheckbox"> Show Braking</label>
@@ -43,11 +43,11 @@ export default {
             return dx * dx + dy * dy
         },
         calculateDx(startX, startY, endX, endY) {
-            const dx =  (endX - startX) / (Math.sqrt((endX-startX)**2 + (endY-startY)**2))
+            const dx = (endX - startX) / (Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2))
             return dx
         },
         calculateDy(startX, startY, endX, endY) {
-            const dy =  (endY - startY) / (Math.sqrt((endX-startX)**2 + (endY-startY)**2))
+            const dy = (endY - startY) / (Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2))
             return dy
         },
 
@@ -93,52 +93,52 @@ export default {
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
 
-                // Create legend
-                //Append a defs (for definition) element to  SVG
-                var defs = this.speedLine.append("defs");
+            // Create legend
+            //Append a defs (for definition) element to  SVG
+            var defs = this.speedLine.append("defs");
 
-                //Append a linearGradient element to the defs and give it a unique id
-                var linearGradient = defs.append("linearGradient")
-                    .attr("id", "linear-gradient");
+            //Append a linearGradient element to the defs and give it a unique id
+            var linearGradient = defs.append("linearGradient")
+                .attr("id", "linear-gradient");
 
-                //Horizontal gradient
-                linearGradient
-                    .attr("x1", "0%")
-                    .attr("y1", "0%")
-                    .attr("x2", "100%")
-                    .attr("y2", "0%");
+            //Horizontal gradient
+            linearGradient
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "100%")
+                .attr("y2", "0%");
 
-                //Set the color for the start (0%)
-                linearGradient.append("stop")
-                    .attr("offset", "0%")
-                    .attr("stop-color", "red"); //red
+            //Set the color for the start (0%)
+            linearGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "red"); //red
 
-                //Set the color for the end (100%)
-                linearGradient.append("stop")
-                    .attr("offset", "100%")
-                    .attr("stop-color", "#eac0a0"); //off-white
+            //Set the color for the end (100%)
+            linearGradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", "#eac0a0"); //off-white
 
-                const legend = this.speedLine.append("g")
-                    .attr("class", "legend")
-                    .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 20 - 20})`)
-                
-                //Draw the rectangle and fill with gradient
-                legend.append("rect")
-                    .attr("x", 0)
-                    .attr("y", 0)
-                    .attr("width", 150)
-                    .attr("height", 20)
-                    .style("fill", "url(#linear-gradient)");
+            const legend = this.speedLine.append("g")
+                .attr("class", "legend")
+                .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 20 - 20})`)
 
-                // Add text for speed range
-                const speedRangeText = legend.append("text")
-                    .attr("x", 0)
-                    .attr("y", 30) // Adjust the vertical position as needed
-                    .attr("font-size", "12px") // Set the font size
-                    .attr("fill", "black"); // Set the text color
+            //Draw the rectangle and fill with gradient
+            legend.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", 150)
+                .attr("height", 20)
+                .style("fill", "url(#linear-gradient)");
 
-                // Update the text content to display the speed range
-                speedRangeText.text(`Speed Range: ${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])}`);
+            // Add text for speed range
+            const speedRangeText = legend.append("text")
+                .attr("x", 0)
+                .attr("y", 30) // Adjust the vertical position as needed
+                .attr("font-size", "12px") // Set the font size
+                .attr("fill", "black"); // Set the text color
+
+            // Update the text content to display the speed range
+            speedRangeText.text(`Speed Range: ${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])}`);
         },
 
         async drawBrakingLines() {
@@ -164,25 +164,25 @@ export default {
                 }
             });
 
-            if (this.drivers.length == 2){
+            if (this.drivers.length == 2) {
                 const telemetry_data_2 = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
-                if (d.FullName == this.drivers[1])
-                    return d
+                    if (d.FullName == this.drivers[1])
+                        return d
                 });
                 telemetry_data_2.forEach((data, index) => {
-                if (data.Brake == 'True') {
-                    this.brakeLine.append("line")
-                        .attr("class", "braking-line")
-                        .attr("x1", this.x(data.X))
-                        .attr("y1", this.y(data.Y))
-                        .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
-                        .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
-                        .attr("stroke", "green")
-                        .attr("stroke-width", 10)
-                        .attr("stroke-linecap", "square")
-                        .attr("opacity", 1)
-                }
-            });
+                    if (data.Brake == 'True') {
+                        this.brakeLine.append("line")
+                            .attr("class", "braking-line")
+                            .attr("x1", this.x(data.X))
+                            .attr("y1", this.y(data.Y))
+                            .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
+                            .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
+                            .attr("stroke", "green")
+                            .attr("stroke-width", 10)
+                            .attr("stroke-linecap", "square")
+                            .attr("opacity", 1)
+                    }
+                });
             }
         },
 
@@ -208,7 +208,7 @@ export default {
 
             // Declare the x (horizontal position) scale.
             this.x = d3.scaleLinear()
-                .domain([extent_x[0]-5, extent_x[1]+5]).nice()
+                .domain([extent_x[0] - 5, extent_x[1] + 5]).nice()
                 .range([marginLeft, width - marginRight])
 
             // Declare the y (vertical position) scale.

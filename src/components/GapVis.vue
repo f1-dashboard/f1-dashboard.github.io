@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Gap</h2>
+        <h2>Time gap between drivers</h2>
         <div id="container"></div>
     </div>
 </template>
