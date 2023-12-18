@@ -40,6 +40,9 @@ export default {
         },
         circuit: {
             default: 1
+        },
+        setDrivers: {
+            default: []
         }
     },
     watch: {
@@ -67,9 +70,15 @@ export default {
             relativeTo = drivers[0].full_name
             }
             // ensure other components are loaded before emitting driver event
-            setTimeout(() =>
+            setTimeout(() => {
+                if (this.setDrivers != undefined) {
+                    this.$emit('EmitDriver', [relativeTo, this.setDrivers[1]]);
+                } else {
+                    this.$emit('EmitDriver', [relativeTo, undefined]);
+                }
+            }, 100)
             // This is temporary to see two drivers, should be removed when you can select two drivers
-            this.$emit('EmitDriver', [relativeTo, "Carlos Sainz"]), 100)
+            
 
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))

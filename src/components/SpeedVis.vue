@@ -79,10 +79,8 @@ export default {
     },
     async mounted() {
         await this.init()
-        this.set_drivers(["Lewis Hamilton"])
-        this.set_drivers(["Carlos Sainz", "Lance Stroll"])
         if (this.relative) {
-            this.set_relative_to("Carlos Sainz")
+           // this.set_relative_to("Carlos Sainz")
         }
     },
     methods: {

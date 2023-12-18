@@ -12,7 +12,7 @@ let quali = ref("Q1")
 let distance = ref(1)
 
 // Drivers is a list (max 2) of drivers that will be compared
-let drivers = ref(["Carlos Sainz"])
+let drivers = ref(["Max Verstappen"])
 let round = ref(1)
 
 const updateRound = (newRound) => {
@@ -28,8 +28,8 @@ const updateRound = (newRound) => {
 
   <div class="content">
     <div class="left">
-      <InfoCard id="ic" :drivers=drivers />
-      <QualifyingResult :qualifying=quali :circuit=round @EmitDriver="(n) => drivers = n" />
+      <InfoCard id="ic" @emitDrivers="(n) => drivers = n" :drivers=drivers />
+      <QualifyingResult :qualifying=quali :circuit=round :setDrivers = drivers @EmitDriver="(n) => drivers = n" />
     </div>
 
     <div class="center">

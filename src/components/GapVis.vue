@@ -75,8 +75,6 @@ export default {
     },
     async mounted() {
         await this.init()
-        // this.drivers = ["Carlos Sainz", "Lance Stroll"]
-        this.set_drivers(["Carlos Sainz", "Lance Stroll"])
     },
     methods: {
         set_relative_to(driver) {
