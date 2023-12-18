@@ -1,5 +1,6 @@
 <template>
     <div>
+        <h2>{{ qualifying }} Results</h2>
         <div id="qual"></div>
     </div>
 </template>
@@ -198,6 +199,14 @@ export default {
             this.gy = this.svg.append("g")
                 .attr("transform", `translate(${this.x(0)},0)`)
                 .call(d3.axisLeft(this.y).tickSize(0));
+
+            // Axis Labels
+            this.svg.append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width - 80)
+                .attr("y", height - 3)
+                .text("time difference (s)");
 
             // Append the SVG element. 
             qual.append(this.svg.node())
