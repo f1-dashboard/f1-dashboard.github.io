@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Speed on track</h2>
+        <h2>Driver speed along track</h2>
         <div id="trackspeedvis"></div>
     </div>
 </template>
@@ -71,10 +71,17 @@ export default {
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
+            // Don't listen to driver updates if data hasn't been loaded
+            if (!this.data) {
+                return
+            }
             this.set_drivers(newVal)
+            this.set_distance(this.distance_highlight)
         },
         circuit: async function (newVal, oldVal) {
             await this.init()
+            this.set_drivers(this.drivers)
+            this.set_distance(this.distance_highlight)
         },
     },
     async mounted() {
@@ -228,9 +235,6 @@ export default {
         },
 
         set_drivers(drivers) {
-            if (!this.pixel_data) {
-                return
-            }
             this.filtered_data = new Map();
             for (const driver_data of this.pixel_data.values()) {
                 if (drivers.includes(driver_data.full_name)) {

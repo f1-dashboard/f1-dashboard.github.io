@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Speed on circuit {{ drivers[0] }}</h2>
+        <h2>{{ drivers[0] }}'s fastest lap</h2>
         <div id="trackvis"></div>
         <input type="checkbox" id="brakingCheckbox">
         <label for="brakingCheckbox"> Show Braking</label>
@@ -43,11 +43,11 @@ export default {
             return dx * dx + dy * dy
         },
         calculateDx(startX, startY, endX, endY) {
-            const dx =  (endX - startX) / (Math.sqrt((endX-startX)**2 + (endY-startY)**2))
+            const dx = (endX - startX) / (Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2))
             return dx
         },
         calculateDy(startX, startY, endX, endY) {
-            const dy =  (endY - startY) / (Math.sqrt((endX-startX)**2 + (endY-startY)**2))
+            const dy = (endY - startY) / (Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2))
             return dy
         },
 
@@ -93,30 +93,30 @@ export default {
                 .attr("stroke-width", 5)
                 .attr("stroke-linecap", "round")
 
-                // Create legend
-                //Append a defs (for definition) element to  SVG
-                var defs = this.speedLine.append("defs");
+            // Create legend
+            //Append a defs (for definition) element to  SVG
+            var defs = this.speedLine.append("defs");
 
-                //Append a linearGradient element to the defs and give it a unique id
-                var linearGradient = defs.append("linearGradient")
-                    .attr("id", "linear-gradient");
+            //Append a linearGradient element to the defs and give it a unique id
+            var linearGradient = defs.append("linearGradient")
+                .attr("id", "linear-gradient");
 
-                //Horizontal gradient
-                linearGradient
-                    .attr("x1", "0%")
-                    .attr("y1", "0%")
-                    .attr("x2", "100%")
-                    .attr("y2", "0%");
+            //Horizontal gradient
+            linearGradient
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "100%")
+                .attr("y2", "0%");
 
-                //Set the color for the start (0%)
-                linearGradient.append("stop")
-                    .attr("offset", "0%")
-                    .attr("stop-color", "red"); //red
+            //Set the color for the start (0%)
+            linearGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "red"); //red
 
-                //Set the color for the end (100%)
-                linearGradient.append("stop")
-                    .attr("offset", "100%")
-                    .attr("stop-color", "#eac0a0"); //off-white
+            //Set the color for the end (100%)
+            linearGradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", "#eac0a0"); //off-white
 
                 const legendSpeed = this.speedLine.append("g")
                     .attr("class", "legend")
@@ -186,8 +186,8 @@ export default {
 
             if (this.drivers.length == 2){
                 const telemetry_data_2 = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
-                if (d.FullName == this.drivers[1])
-                    return d
+                    if (d.FullName == this.drivers[1])
+                        return d
                 });
                 telemetry_data_2.forEach((data, index) => {
                 if (data.Brake == 'True') {
@@ -242,7 +242,7 @@ export default {
 
             // Declare the x (horizontal position) scale.
             this.x = d3.scaleLinear()
-                .domain([extent_x[0]-5, extent_x[1]+5]).nice()
+                .domain([extent_x[0] - 5, extent_x[1] + 5]).nice()
                 .range([marginLeft, width - marginRight])
 
             // Declare the y (vertical position) scale.

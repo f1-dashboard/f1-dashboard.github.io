@@ -36,6 +36,7 @@ export default {
     font-size: x-large;
     margin: 0 30px;
     cursor: pointer;
+    font-family: 'formula1';
 }
 
 .underline {

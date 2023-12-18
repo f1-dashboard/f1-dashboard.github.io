@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Gap</h2>
+        <h2>Time gap between drivers</h2>
         <div id="container"></div>
     </div>
 </template>
@@ -67,10 +67,17 @@ export default {
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
+            // Don't listen to driver updates if data hasn't been loaded
+            if (!this.data) {
+                return
+            }
             this.set_drivers(newVal)
+            this.set_distance(this.distance_highlight)
         },
         circuit: async function (newVal, oldVal) {
             await this.init()
+            this.set_drivers(this.drivers)
+            this.set_distance(this.distance_highlight)
         }
     },
     async mounted() {
@@ -84,14 +91,8 @@ export default {
         },
 
         // Update the line + dots visualization based on x value
-        set_distance(dist, pixel_space = false) {
-            let xm;
-            if (!pixel_space) {
-                xm = this.x(dist)
-            } else {
-                xm = dist
-            }
-
+        set_distance(dist) {
+            let xm = this.x(dist)
 
             // Change line
             this.distance_line
@@ -158,10 +159,6 @@ export default {
         },
 
         set_drivers(drivers) {
-            if (!this.data) {
-                return
-            }
-
             // compute gap between drivers
             let maxGap = 0.1
             this.relative_data_px = new Map()
@@ -323,7 +320,7 @@ export default {
             const [xm, ym] = d3.pointer(event);
 
             this.$emit('DistanceChanged', this.x.invert(xm))
-            this.set_distance(xm, true)
+            this.set_distance(this.x.invert(xm))
         },
 
         showDistanceLine() {
