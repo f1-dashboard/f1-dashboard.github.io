@@ -69,7 +69,7 @@ export default {
             // ensure other components are loaded before emitting driver event
             setTimeout(() =>
                 // This is temporary to see two drivers, should be removed when you can select two drivers
-                this.$emit('EmitDriver', [relativeTo, "Carlos Sainz"]), 100)
+                this.$emit('EmitDriver', [relativeTo, "Carlos Sainz"]), 200)
 
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))
