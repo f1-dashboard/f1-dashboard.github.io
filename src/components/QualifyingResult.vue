@@ -71,10 +71,10 @@ export default {
             }
             // ensure other components are loaded before emitting driver event
             setTimeout(() => {
-                if (this.setDrivers != undefined) {
+                if (this.setDrivers != undefined && this.setDrivers.length == 2) {
                     this.$emit('EmitDriver', [relativeTo, this.setDrivers[1]]);
                 } else {
-                    this.$emit('EmitDriver', [relativeTo, undefined]);
+                    this.$emit('EmitDriver', [relativeTo]);
                 }
             }, 100)
             // This is temporary to see two drivers, should be removed when you can select two drivers
