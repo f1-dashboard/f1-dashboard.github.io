@@ -76,7 +76,6 @@ export default {
     },
     async mounted() {
         await this.init()
-        this.set_drivers(["Carlos Sainz", "Lance Stroll"])
     },
     methods: {
         // Update the line + dots visualization based on x value
