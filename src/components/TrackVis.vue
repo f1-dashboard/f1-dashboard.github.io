@@ -71,12 +71,17 @@ export default {
         },
         async visualizeTrack() {
             const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == this.drivers[0]) return d })
-            const speed_domain = d3.extent(telemetry_data, d => +d.Speed)
+            const [minSpeed, maxSpeed] = d3.extent(telemetry_data, d => +d.Speed)
 
             // define color range
-            var color = d3.scaleLinear()
-                .domain(speed_domain)
-                .range(["red", "#eac0a0"]);
+            // var color = d3.scaleLinear()
+            //     .domain(speed_domain)
+            //     .range(["red", "#eac0a0"]);
+
+
+            // https://d3js.org/d3-scale-chromatic/sequential
+            const colorMap = d3.interpolateInferno
+            const color = d3.scaleSequential((speed) => colorMap((speed - minSpeed) / (maxSpeed - minSpeed)));
 
             this.speedLine.selectAll('line').remove()
             this.speedLine.selectAll('text').remove()
