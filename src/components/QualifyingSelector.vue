@@ -11,7 +11,9 @@
 export default {
     emits: ['QualiChanged'],
     mounted() {
-        this.changeQuali('Q1')
+        setTimeout(() => {
+            this.changeQuali('Q1')
+        }, 50);
     },
     methods: {
         changeQuali(q) {
@@ -25,6 +27,8 @@ export default {
                 console.log(targetPosition)
                 movingLine.style.left = targetPosition + 'px';
             }
+            movingLine.style.transition = "left 0.2s ease"
+            movingLine.style.display = "grid";
         }
     }
 }
@@ -36,6 +40,7 @@ export default {
     font-size: x-large;
     margin: 0 30px;
     cursor: pointer;
+    font-family: 'formula1';
 }
 
 .underline {
@@ -45,8 +50,8 @@ export default {
     background-color: red;
     height: 5px;
     position: absolute;
-    transition: left 0.3s ease;
     left: 0;
+    display: none;
     border-radius: 2px;
 }
 </style>

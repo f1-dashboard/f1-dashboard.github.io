@@ -1,5 +1,6 @@
 <template>
     <div>
+        <h2>{{ qualifying }} Results</h2>
         <div id="qual"></div>
     </div>
 </template>
@@ -66,9 +67,10 @@ export default {
             const format = d3.format("+.3")
             const eps = 0.0000001
 
-        if (!relativeTo) {
-            relativeTo = drivers[0].full_name
+            if (!relativeTo) {
+                relativeTo = drivers[0].full_name
             }
+            
             // ensure other components are loaded before emitting driver event
             setTimeout(() => {
                 if (this.setDrivers != undefined && this.setDrivers.length == 2) {
@@ -77,8 +79,6 @@ export default {
                     this.$emit('EmitDriver', [relativeTo]);
                 }
             }, 100)
-            // This is temporary to see two drivers, should be removed when you can select two drivers
-            
 
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))
@@ -147,7 +147,7 @@ export default {
             d3.select('#qual').selectAll('svg').remove();
 
             // Load data
-            const data = d3.csv("./data/data/" + this.circuit + "/qual_results.csv", (d) => {
+            const data = d3.csv("../data/" + this.circuit + "/qual_results.csv", (d) => {
                 let driver = {
                     full_name: d.FullName,
                     team: d.TeamId
@@ -207,6 +207,14 @@ export default {
             this.gy = this.svg.append("g")
                 .attr("transform", `translate(${this.x(0)},0)`)
                 .call(d3.axisLeft(this.y).tickSize(0));
+
+            // Axis Labels
+            this.svg.append("text")
+                .attr("class", "x label")
+                .attr("text-anchor", "end")
+                .attr("x", width - 80)
+                .attr("y", height - 3)
+                .text("time difference (s)");
 
             // Append the SVG element. 
             qual.append(this.svg.node())

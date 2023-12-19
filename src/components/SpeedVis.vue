@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Speed on track</h2>
+        <h2>Driver speed along track</h2>
         <div id="trackspeedvis"></div>
     </div>
 </template>
@@ -71,10 +71,17 @@ export default {
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
+            // Don't listen to driver updates if data hasn't been loaded
+            if (!this.data) {
+                return
+            }
             this.set_drivers(newVal)
+            this.set_distance(this.distance_highlight)
         },
         circuit: async function (newVal, oldVal) {
             await this.init()
+            this.set_drivers(this.drivers)
+            this.set_distance(this.distance_highlight)
         },
     },
     async mounted() {
@@ -174,11 +181,12 @@ export default {
 
         // Update the line + dots visualization based on x value
         set_distance(dist, pixel_space = false) {
+            let clamped = Math.max(0, Math.min(dist, this.maxX))
             let xm;
             if (!pixel_space) {
-                xm = this.x(dist)
+                xm = this.x(clamped)
             } else {
-                xm = dist
+                xm = clamped
             }
 
             // Change line
@@ -226,9 +234,6 @@ export default {
         },
 
         set_drivers(drivers) {
-            if (!this.pixel_data) {
-                return
-            }
             this.filtered_data = new Map();
             for (const driver_data of this.pixel_data.values()) {
                 if (drivers.includes(driver_data.full_name)) {
@@ -252,7 +257,7 @@ export default {
             d3.select('#trackspeedvis').selectAll('svg').remove();
 
             // Load data
-            this.data_raw = await d3.csv("../data/data/" + this.circuit + "/fastest_laps.csv", d => {
+            this.data_raw = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
                 let driver = {
                     full_name: d.FullName,
                     team: d.TeamId,
