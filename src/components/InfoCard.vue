@@ -10,30 +10,26 @@
 
     <div class="parent-secondary-card">
       <div v-if="this.drivers[1]" class="card">
-      <img :src="this.secondUrl" style="width:100%">
-      <h1 style="font-size: 10px">{{ this.drivers[1] }}</h1>
-      <p class="title">{{ this.secondTeam }}</p>
-      <button class="close-button" @click="$emit('emitDrivers', [this.drivers[0]])">X</button>
-    </div>
-
-    <div v-else class="add-wrapper" ref="exceptionElement">
-      <div class="add-driver" @click="console.log(open); open = !open">
-        <span class="plus-symbol">+</span>
+        <img :src="this.secondUrl" style="width:100%">
+        <h1 style="font-size: 10px">{{ this.drivers[1] }}</h1>
+        <p class="title">{{ this.secondTeam }}</p>
+        <button class="close-button" @click="$emit('emitDrivers', [this.drivers[0]])">X</button>
       </div>
-    </div>
 
-    <div class="items" :class="{ selectHide: !open }" ref="targetElement">
-      <div
-        v-for="(drvr, i) of availableDrivers"
-        :key="i"
-        @click="
+      <div v-else class="add-wrapper" ref="exceptionElement">
+        <div class="add-driver" @click="console.log(open); open = !open">
+          <span class="plus-symbol">+</span>
+        </div>
+      </div>
+
+      <div class="items" :class="{ selectHide: !open }" ref="targetElement">
+        <div v-for="(drvr, i) of availableDrivers" :key="i" @click="
           open = false;
-          $emit('emitDrivers', [this.drivers[0], drvr.driverName]);
-        "
-      >
-        {{ drvr.driverName }}
+        $emit('emitDrivers', [this.drivers[0], drvr.driverName]);
+        ">
+          {{ drvr.driverName }}
+        </div>
       </div>
-    </div>
     </div>
   </div>
 </template>
@@ -43,6 +39,7 @@ import * as d3 from "d3";
 
 export default {
   props: ['drivers'],
+  emits: ['emitDrivers'],
   data() {
     return {
       open: false,
@@ -65,13 +62,13 @@ export default {
       const targetElement = this.$refs.targetElement;
       const exceptionElement = this.$refs.exceptionElement;
 
-      if (!targetElement.contains(event.target)  && !exceptionElement.contains(event.target)) {
+      if (!targetElement.contains(event.target) && !exceptionElement.contains(event.target)) {
         this.open = false;
       }
     },
     async loadDrivers() {
       try {
-        const data = await d3.csv("../data/data/driver_meta.csv");
+        const data = await d3.csv("../data/driver_meta.csv");
         this.availableDrivers = data.map(row => ({
           driverName: row.driverName,
           driverTeam: row.driverTeam,
@@ -87,7 +84,7 @@ export default {
       let newDriver;
 
       if (newVal.length == 2) {
-          newDriver = newVal[1];
+        newDriver = newVal[1];
         if (oldVal.length == 1) {
           // Case when a second driver is added
           const driverData = this.availableDrivers.find(obj => obj.driverName === newDriver);
@@ -106,7 +103,7 @@ export default {
         const driverData = this.availableDrivers.find(obj => obj.driverName === newDriver);
         this.firstTeam = driverData.driverTeam;
         this.firstUrl = driverData.driverUrl;
-        
+
         // Reset second driver data if there was a removal
         if (oldVal.length == 2) {
           this.secondTeam = "";
@@ -135,7 +132,7 @@ export default {
   height: 180px;
   margin: auto;
   text-align: center;
-  display:inline-block;
+  display: inline-block;
   overflow: hidden;
 }
 
@@ -162,15 +159,15 @@ export default {
   text-align: center;
   cursor: pointer;
   display: flex;
-  align-items: center; 
-  justify-content: center; 
+  align-items: center;
+  justify-content: center;
 }
 
 .plus-symbol {
   display: flex;
   font-size: 64px;
   user-select: none;
-  color: rgba(219, 217, 217, 0.7); 
+  color: rgba(219, 217, 217, 0.7);
 }
 
 .items {
@@ -190,8 +187,7 @@ export default {
   overflow-y: auto;
 }
 
-.items > div:not(:last-child) {
+.items>div:not(:last-child) {
   border-bottom: 1px solid black;
 }
-
 </style>

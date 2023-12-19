@@ -71,8 +71,10 @@ export default {
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
+            console.log(newVal)
             // Don't listen to driver updates if data hasn't been loaded
-            if (!this.data) {
+            if (!this.pixel_data) {
+                console.log("not loaded")
                 return
             }
             this.set_drivers(newVal)
@@ -86,9 +88,7 @@ export default {
     },
     async mounted() {
         await this.init()
-        if (this.relative) {
-           // this.set_relative_to("Carlos Sainz")
-        }
+        this.set_drivers(['Carlos Sainz'])
     },
     methods: {
         set_relative_to(driver) {

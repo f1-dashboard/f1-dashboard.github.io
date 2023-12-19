@@ -152,6 +152,10 @@ export default {
             let maxGap = 0.1
             this.relative_data_px = new Map()
             for (let i = 0; i < drivers.length; i++) {
+                if (this.data.get(drivers[i]) === undefined) {
+                    console.warn(`Driver ${drivers[i]} not in data`)
+                    continue
+                }
                 const gapData = this.data.get(drivers[i]).map(d => {
                     const gap = this.get_interpolated_time(drivers[0], d[0]) - d[1]
 
