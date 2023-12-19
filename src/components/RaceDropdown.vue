@@ -2,7 +2,7 @@
   <div class="dropdown">
     <select v-model="selected" @change="emitRoundNumber">
       <option v-for="event in events" :key="event.RoundNumber" :value="event.RoundNumber">
-        {{ event.EventName }} 
+        {{ event.EventName }}
       </option>
     </select>
   </div>
@@ -47,7 +47,8 @@ export default {
 .dropdown {
   text-align: center;
   font-weight: bold;
-  font-family: formula1wide;
+  font-family: formula1;
+  font-size: xx-large;
   /* Align text for the select box */
 }
 
@@ -62,9 +63,11 @@ export default {
   background-position: right 30% center;
   background-size: 50px;
   text-align-last: center;
+  cursor: pointer;
 }
 
 .dropdown option {
   text-align: center;
+  cursor: pointer;
 }
 </style>

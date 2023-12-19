@@ -13,7 +13,15 @@
         <img :src="this.secondUrl" style="width:100%">
         <h1 style="font-size: 10px">{{ this.drivers[1] }}</h1>
         <p class="title">{{ this.secondTeam }}</p>
-        <button class="close-button" @click="$emit('emitDrivers', [this.drivers[0]])">X</button>
+        <button class="close-button" @click="$emit('emitDrivers', [this.drivers[0]])">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-x-square">
+            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+            <path d="m15 9-6 6" />
+            <path d="m9 9 6 6" />
+          </svg>
+        </button>
       </div>
 
       <div v-else class="add-wrapper" ref="exceptionElement">
@@ -117,6 +125,11 @@ export default {
 
 
 <style scope>
+.close-button {
+  color: red;
+  opacity: 0.8;
+}
+
 .selectHide {
   display: none;
 }
@@ -129,7 +142,7 @@ export default {
 .card {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   width: 120px;
-  height: 180px;
+  height: 187px;
   margin: auto;
   text-align: center;
   display: inline-block;
@@ -185,6 +198,7 @@ export default {
   max-height: 400px;
   position: absolute;
   overflow-y: auto;
+  cursor: pointer;
 }
 
 .items>div:not(:last-child) {
