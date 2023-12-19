@@ -44,16 +44,10 @@ export default {
     emits: ['DistanceChanged'],
     props: {
         distance_highlight: {
-            validator(value) {
-                // check between 0 and max distance
-                return true
-            }
+            default: 0
         },
         drivers: {
-            validator(value) {
-                // check valid driver name
-                return true
-            }
+            default: "Max Verstappen"
         },
         relative: {
             default: false
@@ -82,14 +76,9 @@ export default {
     },
     async mounted() {
         await this.init()
-        // this.drivers = ["Carlos Sainz", "Lance Stroll"]
         this.set_drivers(["Carlos Sainz", "Lance Stroll"])
     },
     methods: {
-        set_relative_to(driver) {
-
-        },
-
         // Update the line + dots visualization based on x value
         set_distance(dist) {
             let xm = this.x(dist)
@@ -189,13 +178,18 @@ export default {
                 this.relative_data_px.set(driver[0], gapPXdata)
             }
 
-            this.gy.call(d3.axisLeft(this.y));
+            const t = this.svg.transition().duration(750)
+
+            this.gy
+                .transition(t)
+                .call(d3.axisLeft(this.y));
 
             this.lines
                 .selectAll("path")
                 .data(this.relative_data_px.values())
                 .join("path")
                 .style("mix-blend-mode", "multiply")
+                .transition(t)
                 .attr("d", this.line)
                 .style("stroke", d => colors[d.team])
         },
