@@ -59,7 +59,7 @@ export default {
   -moz-appearance: none;
   appearance: none;
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="black"><polygon points="12,15 8,9 16,9"></polygon></svg>') no-repeat;
-  background-position: right 39% center;
+  background-position: right 30% center;
   background-size: 50px;
   text-align-last: center;
 }
