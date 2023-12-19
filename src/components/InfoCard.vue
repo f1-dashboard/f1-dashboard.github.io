@@ -11,13 +11,13 @@ export default {
   props: ['drivers'],
   data() {
     return {
-      picture_url: "../../data/Placeholder.jpg",
+      picture_url: "../data/Placeholder.jpg",
       team: "Driver team"
     }
   },
   watch: {
     drivers: function (newVal, oldVal) {
-      this.picture_url = "../../data/Placeholder.jpg"
+      this.picture_url = "../data/Placeholder.jpg"
       this.team = "Other team"
     }
   },

@@ -204,7 +204,7 @@ export default {
             d3.select('#container').selectAll('svg').remove();
 
             // Load data
-            this.data_raw = await d3.csv("../data/data/" + this.circuit + "/fastest_laps.csv", d => {
+            this.data_raw = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
                 const time = parseTimeString(d.Time).time
 
                 if (!time) {

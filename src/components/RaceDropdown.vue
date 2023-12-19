@@ -24,7 +24,7 @@ export default {
   methods: {
     async loadEvents() {
       try {
-        const data = await d3.csv("../data/data/meta.csv");
+        const data = await d3.csv("../data/meta.csv");
         this.events = data.map(row => ({
           EventName: row.EventName,
           RoundNumber: row.RoundNumber

@@ -70,7 +70,7 @@ export default {
             this.$emit('EmitDistance', closest.dist)
         },
         async visualizeTrack() {
-            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == this.drivers[0]) return d })
+            const telemetry_data = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == this.drivers[0]) return d })
             const [minSpeed, maxSpeed] = d3.extent(telemetry_data, d => +d.Speed)
 
             // define color range
@@ -99,8 +99,12 @@ export default {
                 .attr("stroke-linecap", "round")
 
             // Create legend
+            const legendWidth = 150
+            const legendHeight = 20
+
             //Append a defs (for definition) element to  SVG
             var defs = this.speedLine.append("defs");
+
 
             //Append a linearGradient element to the defs and give it a unique id
             var linearGradient = defs.append("linearGradient")
@@ -125,29 +129,44 @@ export default {
 
             const legendSpeed = this.speedLine.append("g")
                 .attr("class", "legend")
-                .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 50})`)
+                .attr("transform", `translate(${+this.svg.attr("width") - legendWidth - 75},${+this.svg.attr("height") - 50})`)
 
             //Draw the rectangle and fill with gradient
             legendSpeed.append("rect")
                 .attr("x", 0)
                 .attr("y", 0)
-                .attr("width", 150)
-                .attr("height", 20)
+                .attr("width", legendWidth)
+                .attr("height", legendHeight)
                 .style("fill", "url(#linear-gradient)");
 
             // Add text for speed range
-            const speedRangeText = legendSpeed.append("text")
+            legendSpeed.append("text")
                 .attr("x", 0)
-                .attr("y", 35) // relative to legend
+                .attr("y", legendHeight + 15)
                 .attr("font-size", "12px")
-                .attr("fill", "black");
+                .attr("fill", "black")
+                .text(`${Math.round(minSpeed)}`);
 
-            // Update the text content to display the speed range
-            speedRangeText.text(`${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])} km/h`);
+            legendSpeed.append("text")
+                .attr("x", legendWidth / 2)
+                .attr("y", legendHeight + 15)
+                .attr("font-size", "12px")
+                .attr("fill", "black")
+                .attr("text-anchor", "middle")
+                .text("speed (km/h)");
+
+            legendSpeed.append("text")
+                .attr("x", legendWidth)
+                .attr("y", legendHeight + 15)
+                .attr("font-size", "12px")
+                .attr("fill", "black")
+                .attr("text-anchor", "end")
+                .text(`${Math.round(maxSpeed)}`);
+
         },
 
         async drawBrakingLines() {
-            const telemetry_data = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
+            const telemetry_data = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
                 if (d.FullName == this.drivers[0])
                     return d
             })
@@ -190,7 +209,7 @@ export default {
             LegendDriversText2.text(`${this.drivers[1]}`);
 
             if (this.drivers.length == 2) {
-                const telemetry_data_2 = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
+                const telemetry_data_2 = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
                     if (d.FullName == this.drivers[1])
                         return d
                 });
@@ -230,7 +249,7 @@ export default {
             d3.select('#trackvis').selectAll('svg').remove();
 
             // Load data
-            this.data = await d3.csv("../data/data/" + this.circuit + "/circuit.csv", d => {
+            this.data = await d3.csv("../data/" + this.circuit + "/circuit.csv", d => {
                 return { x: parseFloat(d.X), y: parseFloat(d.Y), dist: parseFloat(d.Distance) }
             });
 
@@ -302,7 +321,7 @@ export default {
                 .datum(this.data)
                 .attr("fill", "none")
                 .attr("stroke", "black")
-                .attr("stroke-width", 5)
+                .attr("stroke-width", 9)
                 .attr("stroke-linejoin", "round")
                 .attr("stroke-linecap", "round")
                 .attr("stroke-dasharray", `0,${l}`)

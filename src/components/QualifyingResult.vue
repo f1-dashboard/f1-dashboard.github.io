@@ -139,7 +139,7 @@ export default {
             d3.select('#qual').selectAll('svg').remove();
 
             // Load data
-            const data = d3.csv("./data/data/" + this.circuit + "/qual_results.csv", (d) => {
+            const data = d3.csv("../data/" + this.circuit + "/qual_results.csv", (d) => {
                 let driver = {
                     full_name: d.FullName,
                     team: d.TeamId

@@ -258,7 +258,7 @@ export default {
             d3.select('#trackspeedvis').selectAll('svg').remove();
 
             // Load data
-            this.data_raw = await d3.csv("../data/data/" + this.circuit + "/fastest_laps.csv", d => {
+            this.data_raw = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
                 let driver = {
                     full_name: d.FullName,
                     team: d.TeamId,
