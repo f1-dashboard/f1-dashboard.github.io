@@ -183,11 +183,12 @@ export default {
 
         // Update the line + dots visualization based on x value
         set_distance(dist, pixel_space = false) {
+            let clamped = Math.max(0, Math.min(dist, this.maxX))
             let xm;
             if (!pixel_space) {
-                xm = this.x(dist)
+                xm = this.x(clamped)
             } else {
-                xm = dist
+                xm = clamped
             }
 
             // Change line

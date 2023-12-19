@@ -81,7 +81,8 @@ export default {
     methods: {
         // Update the line + dots visualization based on x value
         set_distance(dist) {
-            let xm = this.x(dist)
+            let clamped = Math.max(0, Math.min(dist, this.maxX))
+            let xm = this.x(clamped)
 
             // Change line
             this.distance_line
