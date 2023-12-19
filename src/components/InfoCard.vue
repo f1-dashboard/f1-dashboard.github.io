@@ -85,42 +85,33 @@ export default {
   watch: {
     drivers: function (newVal, oldVal) {
       let newDriver;
-      let type;
 
-      console.log(newVal)
-      console.log(oldVal)
-
-      if (newVal.length == 2 && oldVal.length == 1) {
-        newDriver = newVal[1]
-        type = 1;
-      } else if (newVal.length == 2 && oldVal.length == 2) {
-        newDriver = newVal[0]
-        type = 0;
-      } else if (newVal.length == 1 && oldVal.length == 1) {
-        newDriver = newVal[0]
-        type = 0;
-      } else if (newVal.length == 1 && oldVal.length == 2) {
-        newDriver = undefined
-        type = 2;
-      }
-      
-      console.log(newDriver)
-
-      let driverData = this.availableDrivers.filter(obj => {
-        return obj.driverName === newDriver
-      });
-
-      console.log(driverData)
-
-      if (type == 0) {
-        this.firstTeam = driverData[0].driverTeam
-        this.firstUrl = driverData[0].driverUrl
-      } else if (type == 1) {
-        this.secondTeam = driverData[0].driverTeam
-        this.secondUrl = driverData[0].driverUrl
-      } else if (type == 2) {
-        this.secondTeam = ""
-        this.secondUrl = ""
+      if (newVal.length == 2) {
+          newDriver = newVal[1];
+        if (oldVal.length == 1) {
+          // Case when a second driver is added
+          const driverData = this.availableDrivers.find(obj => obj.driverName === newDriver);
+          this.secondTeam = driverData.driverTeam;
+          this.secondUrl = driverData.driverUrl;
+        } else {
+          // Case when the first driver changes but the second remains
+          newDriver = newVal[0];
+          const driverData = this.availableDrivers.find(obj => obj.driverName === newDriver);
+          this.firstTeam = driverData.driverTeam;
+          this.firstUrl = driverData.driverUrl;
+        }
+      } else if (newVal.length == 1) {
+        // Case when there is only one driver (new or remaining after removing second)
+        newDriver = newVal[0];
+        const driverData = this.availableDrivers.find(obj => obj.driverName === newDriver);
+        this.firstTeam = driverData.driverTeam;
+        this.firstUrl = driverData.driverUrl;
+        
+        // Reset second driver data if there was a removal
+        if (oldVal.length == 2) {
+          this.secondTeam = "";
+          this.secondUrl = "";
+        }
       }
     }
   },
