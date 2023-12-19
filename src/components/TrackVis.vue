@@ -123,27 +123,27 @@ export default {
                 .attr("offset", "100%")
                 .attr("stop-color", "#eac0a0"); //off-white
 
-                const legendSpeed = this.speedLine.append("g")
-                    .attr("class", "legend")
-                    .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 50})`)
-                
-                //Draw the rectangle and fill with gradient
-                legendSpeed.append("rect")
-                    .attr("x", 0)
-                    .attr("y", 0)
-                    .attr("width", 150)
-                    .attr("height", 20)
-                    .style("fill", "url(#linear-gradient)");
+            const legendSpeed = this.speedLine.append("g")
+                .attr("class", "legend")
+                .attr("transform", `translate(${+this.svg.attr("width") - 150 - 75},${+this.svg.attr("height") - 50})`)
 
-                // Add text for speed range
-                const speedRangeText = legendSpeed.append("text")
-                    .attr("x", 0)
-                    .attr("y", 35) // relative to legend
-                    .attr("font-size", "12px") 
-                    .attr("fill", "black"); 
+            //Draw the rectangle and fill with gradient
+            legendSpeed.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", 150)
+                .attr("height", 20)
+                .style("fill", "url(#linear-gradient)");
 
-                // Update the text content to display the speed range
-                speedRangeText.text(`${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])} km/h`);
+            // Add text for speed range
+            const speedRangeText = legendSpeed.append("text")
+                .attr("x", 0)
+                .attr("y", 35) // relative to legend
+                .attr("font-size", "12px")
+                .attr("fill", "black");
+
+            // Update the text content to display the speed range
+            speedRangeText.text(`${Math.round(+speed_domain[0])} - ${Math.round(+speed_domain[1])} km/h`);
         },
 
         async drawBrakingLines() {
@@ -171,44 +171,44 @@ export default {
             });
 
             const legendDrivers = this.speedLine.append("g")
-                    .attr("class", "legend-braking-line")
-                    .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
+                .attr("class", "legend-braking-line")
+                .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
 
-                legendDrivers.append("rect")
-                    .attr("x", 0)
-                    .attr("y", 0)
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .style("fill", "yellow");
+            legendDrivers.append("rect")
+                .attr("x", 0)
+                .attr("y", 0)
+                .attr("width", 20)
+                .attr("height", 20)
+                .style("fill", "yellow");
 
-                const LegendDriversText2 = legendDrivers.append("text")
-                    .attr("x", 35)
-                    .attr("y", 45) // relative to legend
-                    .attr("font-size", "12px") 
-                    .attr("fill", "black"); 
+            const LegendDriversText2 = legendDrivers.append("text")
+                .attr("x", 35)
+                .attr("y", 45) // relative to legend
+                .attr("font-size", "12px")
+                .attr("fill", "black");
 
-                LegendDriversText2.text(`${this.drivers[1]}`);
+            LegendDriversText2.text(`${this.drivers[1]}`);
 
-            if (this.drivers.length == 2){
+            if (this.drivers.length == 2) {
                 const telemetry_data_2 = await d3.csv("./data/data/" + this.circuit + "/fastest_laps.csv", d => {
                     if (d.FullName == this.drivers[1])
                         return d
                 });
                 telemetry_data_2.forEach((data, index) => {
-                if (data.Brake == 'True') {
-                    this.brakeLine.append("line")
-                        .attr("class", "braking-line")
-                        .attr("x1", this.x(data.X))
-                        .attr("y1", this.y(data.Y))
-                        .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
-                        .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
-                        .attr("stroke", "green")
-                        .attr("stroke-width", 10)
-                        .attr("stroke-linecap", "square")
-                        .attr("opacity", 1)
-                }
-            });
-            legendDrivers.append("rect")
+                    if (data.Brake == 'True') {
+                        this.brakeLine.append("line")
+                            .attr("class", "braking-line")
+                            .attr("x1", this.x(data.X))
+                            .attr("y1", this.y(data.Y))
+                            .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
+                            .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
+                            .attr("stroke", "green")
+                            .attr("stroke-width", 10)
+                            .attr("stroke-linecap", "square")
+                            .attr("opacity", 1)
+                    }
+                });
+                legendDrivers.append("rect")
                     .attr("x", 0)
                     .attr("y", 30)
                     .attr("width", 20)
@@ -218,10 +218,10 @@ export default {
                 const LegendDriversText1 = legendDrivers.append("text")
                     .attr("x", 35)
                     .attr("y", 15) // relative to legend
-                    .attr("font-size", "12px") 
-                    .attr("fill", "black"); 
+                    .attr("font-size", "12px")
+                    .attr("fill", "black");
 
-                    LegendDriversText1.text(`${this.drivers[0]}`);
+                LegendDriversText1.text(`${this.drivers[0]}`);
             }
         },
 
