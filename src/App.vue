@@ -7,6 +7,7 @@ import { ref } from 'vue'
 import InfoCard from './components/InfoCard.vue'
 import GapVis from './components/GapVis.vue'
 import QualifyingSelector from './components/QualifyingSelector.vue'
+import Introduction from './components/Introduction.vue'
 
 let quali = ref("Q1")
 let distance = ref(1)
@@ -39,6 +40,7 @@ const updateRound = (newRound) => {
     <div class="right">
       <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
       <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
+      <Introduction />
     </div>
   </div>
   <div id="qs">
@@ -51,6 +53,13 @@ const updateRound = (newRound) => {
   text-align: center;
   font-size: 1.7em;
   text-align: center;
+}
+
+.center {
+  display: flex;
+  margin-bottom: 75px;
+  align-items: center;
+  justify-content: center;
 }
 
 .content {
@@ -66,15 +75,11 @@ const updateRound = (newRound) => {
 
 #ic {
   margin-top: 20px;
+  margin-bottom: 30px;
 }
 
 #qs {
   text-align: center;
 }
-
-/* 
-#quali {
-  margin-top: 100px;
-} */
 </style>
 

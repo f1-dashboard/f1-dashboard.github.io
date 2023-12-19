@@ -7,6 +7,16 @@
     </div>
 </template>
 
+<style scoped>
+/* #trackvis {
+    background-color: aliceblue;
+    border-radius: 5px;
+    padding: 5px 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.5);
+} */
+</style>
+
 <script>
 import * as d3 from "d3";
 
@@ -261,7 +271,7 @@ export default {
             const marginRight = 100;
             const marginBottom = 50;
             const marginLeft = 100;
-            const width = 640;
+            const width = 700;
             const height = width * (extent_y[1] - extent_y[0]) / (extent_x[1] - extent_x[0]);
 
             // Declare the x (horizontal position) scale.
