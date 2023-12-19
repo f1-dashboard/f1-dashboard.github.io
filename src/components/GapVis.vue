@@ -178,6 +178,7 @@ export default {
                 this.relative_data_px.set(drivers[i], gapData)
             }
 
+            maxGap += 0.2
             this.y.domain([-maxGap, maxGap])
 
             // convert gap data to pixel space
