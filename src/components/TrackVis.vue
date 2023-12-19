@@ -198,7 +198,7 @@ export default {
                         .attr("opacity", 1)
                 }
             });
-
+            
             const legendDrivers = this.speedLine.append("g")
                 .attr("class", "legend-braking-line")
                 .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
@@ -212,11 +212,11 @@ export default {
 
             const LegendDriversText2 = legendDrivers.append("text")
                 .attr("x", 35)
-                .attr("y", 45) // relative to legend
+                .attr("y", 15) // relative to legend
                 .attr("font-size", "12px")
                 .attr("fill", "black");
 
-            LegendDriversText2.text(`${this.drivers[1]}`);
+            LegendDriversText2.text(`${this.drivers[0]}`);
 
             if (this.drivers.length == 2) {
                 const telemetry_data_2 = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
@@ -246,11 +246,11 @@ export default {
 
                 const LegendDriversText1 = legendDrivers.append("text")
                     .attr("x", 35)
-                    .attr("y", 15) // relative to legend
+                    .attr("y", 45) // relative to legend
                     .attr("font-size", "12px")
                     .attr("fill", "black");
 
-                LegendDriversText1.text(`${this.drivers[0]}`);
+                LegendDriversText1.text(`${this.drivers[1]}`);
             }
         },
 
