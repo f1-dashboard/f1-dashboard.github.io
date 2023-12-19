@@ -7,12 +7,13 @@ import { ref } from 'vue'
 import InfoCard from './components/InfoCard.vue'
 import GapVis from './components/GapVis.vue'
 import QualifyingSelector from './components/QualifyingSelector.vue'
+import Introduction from './components/Introduction.vue'
 
 let quali = ref("Q1")
 let distance = ref(1)
 
 // Drivers is a list (max 2) of drivers that will be compared
-let drivers = ref(["Carlos Sainz"])
+let drivers = ref(["Max Verstappen"])
 let round = ref(1)
 
 const updateRound = (newRound) => {
@@ -28,8 +29,8 @@ const updateRound = (newRound) => {
 
   <div class="content">
     <div class="left">
-      <InfoCard id="ic" :drivers=drivers />
-      <QualifyingResult :qualifying=quali :circuit=round @EmitDriver="(n) => drivers = n" />
+      <InfoCard id="ic" @emitDrivers="(n) => drivers = n" :drivers=drivers />
+      <QualifyingResult :qualifying=quali :circuit=round :setDrivers = drivers @EmitDriver="(n) => drivers = n" />
     </div>
 
     <div class="center">
@@ -39,6 +40,7 @@ const updateRound = (newRound) => {
     <div class="right">
       <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
       <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
+      <Introduction />
     </div>
   </div>
   <div id="qs">
@@ -51,6 +53,13 @@ const updateRound = (newRound) => {
   text-align: center;
   font-size: 1.7em;
   text-align: center;
+}
+
+.center {
+  display: flex;
+  margin-bottom: 75px;
+  align-items: center;
+  justify-content: center;
 }
 
 .content {
@@ -66,15 +75,11 @@ const updateRound = (newRound) => {
 
 #ic {
   margin-top: 20px;
+  margin-bottom: 30px;
 }
 
 #qs {
   text-align: center;
 }
-
-/* 
-#quali {
-  margin-top: 100px;
-} */
 </style>
 

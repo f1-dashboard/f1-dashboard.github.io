@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>Gap</h2>
+        <h2>Time gap between drivers</h2>
         <div id="container"></div>
     </div>
 </template>
@@ -44,16 +44,10 @@ export default {
     emits: ['DistanceChanged'],
     props: {
         distance_highlight: {
-            validator(value) {
-                // check between 0 and max distance
-                return true
-            }
+            default: 0
         },
         drivers: {
-            validator(value) {
-                // check valid driver name
-                return true
-            }
+            default: "Max Verstappen"
         },
         relative: {
             default: false
@@ -67,31 +61,27 @@ export default {
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
+            // Don't listen to driver updates if data hasn't been loaded
+            if (!this.data) {
+                return
+            }
             this.set_drivers(newVal)
+            this.set_distance(this.distance_highlight)
         },
         circuit: async function (newVal, oldVal) {
             await this.init()
+            this.set_drivers(this.drivers)
+            this.set_distance(this.distance_highlight)
         }
     },
     async mounted() {
         await this.init()
-        // this.drivers = ["Carlos Sainz", "Lance Stroll"]
-        this.set_drivers(["Carlos Sainz", "Lance Stroll"])
     },
     methods: {
-        set_relative_to(driver) {
-
-        },
-
         // Update the line + dots visualization based on x value
-        set_distance(dist, pixel_space = false) {
-            let xm;
-            if (!pixel_space) {
-                xm = this.x(dist)
-            } else {
-                xm = dist
-            }
-
+        set_distance(dist) {
+            let clamped = Math.max(0, Math.min(dist, this.maxX))
+            let xm = this.x(clamped)
 
             // Change line
             this.distance_line
@@ -158,10 +148,6 @@ export default {
         },
 
         set_drivers(drivers) {
-            if (!this.data) {
-                return
-            }
-
             // compute gap between drivers
             let maxGap = 0.1
             this.relative_data_px = new Map()
@@ -181,6 +167,7 @@ export default {
                 this.relative_data_px.set(drivers[i], gapData)
             }
 
+            maxGap += 0.2
             this.y.domain([-maxGap, maxGap])
 
             // convert gap data to pixel space
@@ -191,13 +178,18 @@ export default {
                 this.relative_data_px.set(driver[0], gapPXdata)
             }
 
-            this.gy.call(d3.axisLeft(this.y));
+            const t = this.svg.transition().duration(750)
+
+            this.gy
+                .transition(t)
+                .call(d3.axisLeft(this.y));
 
             this.lines
                 .selectAll("path")
                 .data(this.relative_data_px.values())
                 .join("path")
                 .style("mix-blend-mode", "multiply")
+                .transition(t)
                 .attr("d", this.line)
                 .style("stroke", d => colors[d.team])
         },
@@ -207,7 +199,7 @@ export default {
             d3.select('#container').selectAll('svg').remove();
 
             // Load data
-            this.data_raw = await d3.csv("../data/data/" + this.circuit + "/fastest_laps.csv", d => {
+            this.data_raw = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
                 const time = parseTimeString(d.Time).time
 
                 if (!time) {
@@ -323,7 +315,7 @@ export default {
             const [xm, ym] = d3.pointer(event);
 
             this.$emit('DistanceChanged', this.x.invert(xm))
-            this.set_distance(xm, true)
+            this.set_distance(this.x.invert(xm))
         },
 
         showDistanceLine() {
