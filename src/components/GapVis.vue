@@ -75,6 +75,7 @@ export default {
             this.set_distance(this.distance_highlight)
         },
         circuit: async function (newVal, oldVal) {
+            this.loaded = false
             await this.init()
             this.set_drivers(this.drivers)
             this.set_distance(this.distance_highlight)

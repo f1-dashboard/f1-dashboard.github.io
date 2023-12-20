@@ -29,13 +29,20 @@ const updateRound = (newRound) => {
 
   <div class="content">
     <div class="left">
-      <InfoCard id="ic" @emitDrivers="(n) => drivers = n" :drivers=drivers />
+      <div id="ic">
+        <InfoCard @emitDrivers="(n) => drivers = n" :drivers=drivers />
+      </div>
       <QualifyingResult :qualifying=quali :circuit=round :setDrivers=drivers @EmitDriver="(n) => drivers = n" />
     </div>
 
     <div class="center">
-      <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance"
-        :qualifying="quali" />
+      <div id="track">
+        <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance"
+          :qualifying="quali" />
+      </div>
+      <div id="qs">
+        <QualifyingSelector @QualiChanged="q => quali = q" />
+      </div>
     </div>
 
     <div class="right">
@@ -45,9 +52,6 @@ const updateRound = (newRound) => {
         :qualifying="quali" />
       <Introduction />
     </div>
-  </div>
-  <div id="qs">
-    <QualifyingSelector @QualiChanged="q => quali = q" />
   </div>
 </template>
 
@@ -60,7 +64,8 @@ const updateRound = (newRound) => {
 
 .center {
   display: flex;
-  margin-bottom: 75px;
+  position: relative;
+  margin-top: 0px;
   align-items: center;
   justify-content: center;
 }
@@ -76,13 +81,27 @@ const updateRound = (newRound) => {
   overflow: auto;
 }
 
+.left {
+  margin-top: -30px;
+}
+
 #ic {
-  margin-top: 20px;
   margin-bottom: 30px;
+}
+
+#track {
+  margin-bottom: 40px;
 }
 
 #qs {
   text-align: center;
+  position: absolute;
+  bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  left: 0;
+  right: 0;
+  margin-bottom: 40px;
 }
 </style>
 

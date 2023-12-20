@@ -212,7 +212,7 @@ export default {
                 .attr("width", width)
                 .attr("height", height)
                 .attr("viewBox", [0, 0, width, height])
-                .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
+                .attr("style", "max-width: 100%; height: auto; font: 12px sans-serif;");
 
             // Create the bar for each driver
             this.bars = this.svg.append("g")

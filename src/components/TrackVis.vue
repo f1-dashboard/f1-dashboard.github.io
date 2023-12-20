@@ -38,7 +38,7 @@ export default {
 
     watch: {
         drivers: function (newVal, oldVal) {
-            if (!this.mounted) {
+            if (!this.loaded) {
                 return
             }
             this.visualizeTrack();
@@ -48,13 +48,16 @@ export default {
             }
         },
         circuit: async function (newVal, oldVal) {
+            this.loaded = false
             await this.init();
+            this.visualizeTrack()
+            this.loaded = true
         },
         distance_highlight: function (newVal, oldVal) {
             this.updateDistancePoint(newVal)
         },
         qualifying: function (newVal, oldVal) {
-            if (!this.mounted) {
+            if (!this.loaded) {
                 return
             }
             this.visualizeTrack();
@@ -68,7 +71,7 @@ export default {
     async mounted() {
         await this.init()
         this.visualizeTrack()
-        this.mounted = true
+        this.loaded = true
     },
     methods: {
         calculateDistance(point1, point2) {
