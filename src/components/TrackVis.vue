@@ -20,6 +20,19 @@
 <script>
 import * as d3 from "d3";
 
+const colors = {
+    red_bull: "#3671c6",
+    mercedes: "#6cd3bf",
+    ferrari: "#f91536",
+    mclaren: "#f58020",
+    aston_martin: "#358c75",
+    alpine: "#2293d1",
+    williams: "#37bedd",
+    alphatauri: "#5e8faa",
+    alfa: "#c92d4b",
+    haas: "#b6babd",
+}
+
 export default {
     props: ['drivers', 'circuit', 'distance_highlight'],
 
@@ -93,7 +106,8 @@ export default {
 
             // https://d3js.org/d3-scale-chromatic/sequential
             // const colorMap = d3.interpolateInferno
-            const colorMap = d3.interpolateOrRd
+            const colorMap = d3.interpolateRdPu
+            // const colorMap = d3.interpolateReds
             const color = d3.scaleSequential((speed) => colorMap((speed - minSpeed) / (maxSpeed - minSpeed)));
 
             this.speedLine.selectAll('line').remove()
@@ -130,19 +144,26 @@ export default {
                 .attr("x2", "100%")
                 .attr("y2", "0%");
 
-            //Set the color for the start (0%)
-            linearGradient.append("stop")
-                .attr("offset", "0%")
-                .attr("stop-color", "red"); //red
+            for (let i = 0; i <= 100; i += 10) {
+                //Set the color for the start (0%)
+                linearGradient.append("stop")
+                    .attr("offset", `${i}%`)
+                    .attr("stop-color", colorMap(i / 100));
+            }
 
-            //Set the color for the end (100%)
-            linearGradient.append("stop")
-                .attr("offset", "100%")
-                .attr("stop-color", "#eac0a0"); //off-white
 
             const legendSpeed = this.speedLine.append("g")
                 .attr("class", "legend")
                 .attr("transform", `translate(${+this.svg.attr("width") - legendWidth - 75},${+this.svg.attr("height") - 50})`)
+
+            // // Legend border
+            const borderWidth = 2
+            legendSpeed.append("rect")
+                .attr("x", -borderWidth)
+                .attr("y", -borderWidth)
+                .attr("width", legendWidth + 2 * borderWidth)
+                .attr("height", legendHeight + 2 * borderWidth)
+                .style("fill", "black");
 
             //Draw the rectangle and fill with gradient
             legendSpeed.append("rect")
@@ -179,83 +200,86 @@ export default {
         },
 
         drawBrakingLines() {
-            const telemetry_data = d3.filter(this.driver_data, d => d.FullName == this.drivers[0])
+            // Minimum distance between two braking poitns to be considered different lines
+            const min_break_distance = 50
 
             this.svg.selectAll('.braking-line').remove();
             this.svg.selectAll('.legend-braking-line').remove();
 
-            // const driver1color = "#E01A4F"
-            // const driver2color = "#53B3CB"
-
-            const driver1color = "#36c221"
-            const driver2color = "blue"
-
-
-            telemetry_data.forEach((data, index) => {
-                if (data.Brake == 'True') {
-                    this.brakeLine.append("line")
-                        .attr("class", "braking-line")
-                        .attr("x1", this.x(data.X))
-                        .attr("y1", this.y(data.Y))
-                        .attr("x2", telemetry_data[index + 1] ? this.x(telemetry_data[index + 1].X) : this.x(data.X))
-                        .attr("y2", telemetry_data[index + 1] ? this.y(telemetry_data[index + 1].Y) : this.y(data.Y))
-                        .attr("stroke", driver1color)
-                        .attr("stroke-width", 20)
-                        .attr("stroke-linecap", "square")
-                        .attr("opacity", 1)
+            const drawBrakingLine = (driverName, stroke_width, legend_y, color = undefined) => {
+                const telemetry_data = d3.filter(this.driver_data, d => d.FullName === driverName && d.Brake === 'True')
+                if (!color) {
+                    color = colors[telemetry_data[0].TeamId]
                 }
-            });
+
+                const grouped_data = []
+                let current_break_section = []
+                telemetry_data.forEach((data, index) => {
+                    let this_distance = data.Distance
+                    // this logic is false but it doesn't matter cause nobody is braking at the finish
+                    let next_distance = telemetry_data[index + 1] ? telemetry_data[index + 1].Distance : telemetry_data[0].Distance
+
+                    if (next_distance - this_distance < min_break_distance) {
+                        current_break_section.push(data)
+                    } else {
+                        grouped_data.push(current_break_section)
+                        current_break_section = []
+                    }
+                })
+                if (current_break_section.length > 0) {
+                    grouped_data.push(current_break_section)
+                }
+
+                const brakePath = d3.line()
+                    .curve(d3.curveBasisOpen)
+                    .x(d => this.x(d.X)).y(d => this.y(d.Y))
+
+                for (const driver_data of grouped_data) {
+                    const length = (path) => d3.create("svg:path").attr("d", path).node().getTotalLength()
+                    const l = length(this.track(driver_data));
+
+                    this.brakeLine.append("path")
+                        .datum(driver_data)
+                        .attr("class", "braking-line")
+                        .attr("fill", "none")
+                        .attr("stroke", color)
+                        .attr("stroke-width", stroke_width)
+                        .attr("stroke-linejoin", "miter-clip")
+                        .attr("stroke-linecap", "butt")
+                        .attr("d", brakePath)
+                        .attr("stroke-dasharray", `${l},${l}`);
+                }
+
+                legendDrivers.append("rect")
+                    .attr("x", 0)
+                    .attr("y", legend_y)
+                    .attr("width", 20)
+                    .attr("height", 20)
+                    .style("fill", color);
+
+                const LegendDriversText1 = legendDrivers.append("text")
+                    .attr("x", 35)
+                    .attr("y", 15 + legend_y) // relative to legend
+                    .attr("font-size", "12px")
+                    .attr("fill", "black");
+
+                LegendDriversText1.text(driverName);
+            }
+
+            // const driverColor1 = "#E01A4F"
+            // const driverColor2 = "#53B3CB"
+            // undefined colors means the driver's team color will be selected
+            const driverColor1 = undefined
+            const driverColor2 = undefined
+            // const driverColor2 = "limegreen"
 
             const legendDrivers = this.speedLine.append("g")
                 .attr("class", "legend-braking-line")
                 .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
 
-            legendDrivers.append("rect")
-                .attr("x", 0)
-                .attr("y", 0)
-                .attr("width", 20)
-                .attr("height", 20)
-                .style("fill", driver1color);
-
-            const LegendDriversText2 = legendDrivers.append("text")
-                .attr("x", 35)
-                .attr("y", 15) // relative to legend
-                .attr("font-size", "12px")
-                .attr("fill", "black");
-
-            LegendDriversText2.text(`${this.drivers[0]}`);
-
+            drawBrakingLine(this.drivers[0], 25, 0, driverColor1)
             if (this.drivers.length == 2) {
-                const telemetry_data_2 = d3.filter(this.driver_data, d => d.FullName == this.drivers[1])
-
-                telemetry_data_2.forEach((data, index) => {
-                    if (data.Brake == 'True') {
-                        this.brakeLine.append("line")
-                            .attr("class", "braking-line")
-                            .attr("x1", this.x(data.X))
-                            .attr("y1", this.y(data.Y))
-                            .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
-                            .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
-                            .attr("stroke", driver2color)
-                            .attr("stroke-width", 14)
-                            .attr("stroke-linecap", "square")
-                            .attr("opacity", 1)
-                    }
-                });
-                legendDrivers.append("rect")
-                    .attr("x", 0)
-                    .attr("y", 30)
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .style("fill", driver2color);
-
-                const LegendDriversText1 = legendDrivers.append("text")
-                    .attr("x", 35)
-                    .attr("y", 45) // relative to legend
-                    .attr("font-size", "12px")
-                    .attr("fill", "black");
-
-                LegendDriversText1.text(`${this.drivers[1]}`);
+                drawBrakingLine(this.drivers[1], 18, 30, driverColor2)
             }
         },
 
