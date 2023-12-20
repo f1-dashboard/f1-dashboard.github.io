@@ -2,13 +2,17 @@
   <h2>Selected driver(s)</h2>
 
   <div class="card-content-box">
-    <div class="card" id="first">
-      <img :src="this.firstUrl" style="width:100%">
-      <h1 style="font-size: 10px">{{ this.drivers[0] }}</h1>
-      <p class="title">{{ this.firstTeam }}</p>
-    </div>
+    <transition name="fade" mode="out-in">
+      <div class="card" id="first" :key="this.drivers[0]">
+        <img :src="this.firstUrl" style="width:100%">
+        <h1 style="font-size: 10px">{{ this.drivers[0] }}</h1>
+        <p class="title">{{ this.firstTeam }}</p>
+      </div>
+    </transition>
+    
 
-    <div class="parent-secondary-card">
+    <transition name="fade" mode="out-in">
+      <div class="parent-secondary-card" :key="drivers.length">
       <div v-if="this.drivers[1]" class="card">
         <img :src="this.secondUrl" style="width:100%">
         <h1 style="font-size: 10px">{{ this.drivers[1] }}</h1>
@@ -39,6 +43,7 @@
         </div>
       </div>
     </div>
+    </transition>
   </div>
 </template>
 
@@ -203,5 +208,12 @@ export default {
 
 .items>div:not(:last-child) {
   border-bottom: 1px solid black;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .2s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
 }
 </style>
