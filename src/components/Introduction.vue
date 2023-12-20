@@ -2,7 +2,8 @@
     <div class="text">
         <h3>F1 Dashboard - 2023 Season</h3>
         <p>
-            This dashboard visualizes driver's fastest laps across their qualifying times for the 2023 F1 Season.
+            Visualize driver's fastest laps accross the qualifying sessions of the F1 season. Compare braking points
+            and corner speeds to discover why certain lap times are faster than others.
         </p>
     </div>
 </template>
@@ -17,5 +18,10 @@ h3 {
     padding: 10px;
     background-color: rgba(122, 255, 0, 0.3);
     border-radius: 5px;
+}
+
+.text>p {
+    text-align: justify;
+    padding-inline: 15px;
 }
 </style>
