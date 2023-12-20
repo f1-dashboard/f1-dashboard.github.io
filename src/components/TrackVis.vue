@@ -92,7 +92,8 @@ export default {
 
 
             // https://d3js.org/d3-scale-chromatic/sequential
-            const colorMap = d3.interpolateInferno
+            // const colorMap = d3.interpolateInferno
+            const colorMap = d3.interpolateOrRd
             const color = d3.scaleSequential((speed) => colorMap((speed - minSpeed) / (maxSpeed - minSpeed)));
 
             this.speedLine.selectAll('line').remove()
@@ -183,6 +184,13 @@ export default {
             this.svg.selectAll('.braking-line').remove();
             this.svg.selectAll('.legend-braking-line').remove();
 
+            // const driver1color = "#E01A4F"
+            // const driver2color = "#53B3CB"
+
+            const driver1color = "#36c221"
+            const driver2color = "blue"
+
+
             telemetry_data.forEach((data, index) => {
                 if (data.Brake == 'True') {
                     this.brakeLine.append("line")
@@ -191,8 +199,8 @@ export default {
                         .attr("y1", this.y(data.Y))
                         .attr("x2", telemetry_data[index + 1] ? this.x(telemetry_data[index + 1].X) : this.x(data.X))
                         .attr("y2", telemetry_data[index + 1] ? this.y(telemetry_data[index + 1].Y) : this.y(data.Y))
-                        .attr("stroke", "#ffa600")
-                        .attr("stroke-width", 15)
+                        .attr("stroke", driver1color)
+                        .attr("stroke-width", 20)
                         .attr("stroke-linecap", "square")
                         .attr("opacity", 1)
                 }
@@ -207,7 +215,7 @@ export default {
                 .attr("y", 0)
                 .attr("width", 20)
                 .attr("height", 20)
-                .style("fill", "yellow");
+                .style("fill", driver1color);
 
             const LegendDriversText2 = legendDrivers.append("text")
                 .attr("x", 35)
@@ -228,8 +236,8 @@ export default {
                             .attr("y1", this.y(data.Y))
                             .attr("x2", telemetry_data_2[index + 1] ? this.x(telemetry_data_2[index + 1].X) : this.x(data.X))
                             .attr("y2", telemetry_data_2[index + 1] ? this.y(telemetry_data_2[index + 1].Y) : this.y(data.Y))
-                            .attr("stroke", "green")
-                            .attr("stroke-width", 10)
+                            .attr("stroke", driver2color)
+                            .attr("stroke-width", 14)
                             .attr("stroke-linecap", "square")
                             .attr("opacity", 1)
                     }
@@ -239,7 +247,7 @@ export default {
                     .attr("y", 30)
                     .attr("width", 20)
                     .attr("height", 20)
-                    .style("fill", "green");
+                    .style("fill", driver2color);
 
                 const LegendDriversText1 = legendDrivers.append("text")
                     .attr("x", 35)
@@ -325,6 +333,8 @@ export default {
             const length = (path) => d3.create("svg:path").attr("d", path).node().getTotalLength()
             const l = length(this.track(this.circuit_data));
 
+            this.brakeLine = this.svg.append("g")
+
             this.svg.append("path")
                 .datum(this.circuit_data)
                 .attr("fill", "none")
@@ -339,7 +349,6 @@ export default {
                 .ease(d3.easeLinear)
                 .attr("stroke-dasharray", `${l},${l}`);
 
-            this.brakeLine = this.svg.append("g")
 
             // draw speed 
             this.speedLine = this.svg.append("g")
