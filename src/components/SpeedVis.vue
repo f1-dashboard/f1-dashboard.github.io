@@ -7,7 +7,6 @@
 
 <script>
 import * as d3 from "d3";
-import { CurveInterpolator } from 'curve-interpolator';
 
 const colors = {
     red_bull: "#3671c6",
@@ -27,21 +26,6 @@ function linearInterpolate(x, p0, p1) {
     return p0[5] + t * (p1[5] - p0[5]);
 }
 
-// this might be wrong, check https://en.wikipedia.org/wiki/Spline_interpolation
-function cubicBezierInterpolation(x, p0, p1, p2, p3) {
-    const t = (x - p0[4]) / (p3[4] - p0[4]);
-    const u = 1 - t;
-    const tt = t * t;
-    const uu = u * u;
-    const uuu = uu * u;
-    const ttt = tt * t;
-
-    const p = [];
-    p[4] = uuu * p0[4] + 3 * uu * t * p1[4] + 3 * u * tt * p2[4] + ttt * p3[4];
-    p[5] = uuu * p0[5] + 3 * uu * t * p1[5] + 3 * u * tt * p2[5] + ttt * p3[5];
-
-    return p[5];
-}
 
 
 export default {
@@ -90,69 +74,6 @@ export default {
         this.mounted = true
     },
     methods: {
-        set_relative_to(driver) {
-            this.y.domain([-100, 100]).nice()
-            this.gy.call(d3.axisLeft(this.y))
-
-            const n = 1000
-            let dist = d3.interpolateBasis(this.filtered_data.get(driver).map(d => d[4]))
-            let speed = d3.interpolateBasis(this.filtered_data.get(driver).map(d => d[5]))
-            const interpreted_points = d3.zip(d3.quantize(dist, n), d3.quantize(speed, n))
-
-
-            const interp = new CurveInterpolator(this.filtered_data.get(driver).map(d => [d[4], d[5]]), { tension: 0.2, alpha: 0.5 });
-            const max_dist = d3.max(this.filtered_data.get(driver).map(d => d[4]))
-
-            let relative_data = new Map()
-            for (const [name, driver_data] of this.filtered_data) {
-                let relativeSpeedLinear = new Array()
-
-                // OLD - linear interpolation
-                for (const point of driver_data) {
-                    // this is really annoying. driver_data should just be mapping of name to dist/speed. use this.x() to get x value
-                    const [x, y, name, team, dist, speed] = point
-                    // get the interpolated dist, speed from the relative drive
-                    const relativeSpeed = speed - this.get_interpolated_speed(driver, dist)
-                    relativeSpeedLinear.push([x, this.y(relativeSpeed)])
-                }
-
-
-                // NEW - a bit better but the interpolation is still not good enough
-                let i_dist = d3.interpolateBasis(this.filtered_data.get(name).map(d => d[4]))
-                let i_speed = d3.interpolateBasis(this.filtered_data.get(name).map(d => d[5]))
-                const i_points = d3.zip(d3.quantize(i_dist, n), d3.quantize(i_speed, n))
-                const relativeSpeedBasis = i_points.map((d, i) => {
-                    return [this.x(d[0]), this.y(d[1] - interpreted_points[i][1])]
-                }
-                )
-
-                const relativeSpeedCurve = this.filtered_data.get(name).map(d => {
-                    return [this.x(d[4]), this.y(d[5] - interp.getPointAt(d[4] / max_dist)[1])]
-                })
-                relativeSpeedCurve["full_name"] = name
-                relativeSpeedCurve["team"] = driver_data.team
-
-                relativeSpeedBasis["full_name"] = name
-                relativeSpeedBasis["team"] = driver_data.team
-
-                relativeSpeedLinear["full_name"] = name
-                relativeSpeedLinear["team"] = driver_data.team
-
-                // relative_data.set(name, relativeSpeedCurve)
-                // TODO: apply smoothing
-                relative_data.set(name, relativeSpeedLinear)
-                // relative_data.set(name, relativeSpeedLinear)
-            }
-
-            this.driver_lines
-                .selectAll("path")
-                .data(relative_data.values())
-                .join("path")
-                .style("mix-blend-mode", "multiply")
-                .attr("d", this.line)
-                .style("stroke", d => colors[d.team])
-        },
-
         get_interpolated_speed(driver, dist) {
             // filtered data is array of [x (pixel space), y (pixel space), full_name, team, dist, speed]
             const data = this.filtered_data.get(driver)
@@ -167,12 +88,8 @@ export default {
             if (i === data.length) {
                 return data[data.length - 1][1];
             }
-            if (i === data.length - 1 || i === 1) {
-                return linearInterpolate(dist, data[i - 1], data[i])
-            }
 
             return linearInterpolate(dist, data[i - 1], data[i])
-            return cubicBezierInterpolation(dist, data[i - 2], data[i - 1], data[i], data[i + 1]);
         },
 
         // Update the line + dots visualization based on x value
