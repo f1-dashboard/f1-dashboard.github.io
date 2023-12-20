@@ -171,7 +171,7 @@ export default {
                     continue
                 }
                 const gapData = this.data[this.qualifying].get(drivers[i]).map(d => {
-                    const gap = this.get_interpolated_time(drivers[0], d[0]) - d[1]
+                    const gap = d[1] - this.get_interpolated_time(drivers[0], d[0])
 
                     if (gap > maxGap) {
                         maxGap = gap
