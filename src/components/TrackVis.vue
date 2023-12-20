@@ -215,7 +215,7 @@ export default {
 
         drawBrakingLines() {
             // Minimum distance between two braking poitns to be considered different lines
-            const min_break_distance = 50
+            const min_break_distance = 30
 
             this.svg.selectAll('.braking-line').remove();
             this.svg.selectAll('.legend-braking-line').remove();
@@ -294,6 +294,10 @@ export default {
                 .attr("class", "legend-braking-line")
                 .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
 
+            legendDrivers.append("text")
+                .text("Braking Zones")
+                .attr("dy", "-10px")
+
             drawBrakingLine(this.drivers[0], 25, 0, driverColor1)
             if (this.drivers.length == 2) {
                 drawBrakingLine(this.drivers[1], 18, 30, driverColor2)
@@ -321,7 +325,7 @@ export default {
             // Declare the chart dimensions and margins.
             const marginTop = 20;
             const marginRight = 100;
-            const marginBottom = 50;
+            const marginBottom = 60;
             const marginLeft = 100;
             const width = 700;
             const height = width * (extent_y[1] - extent_y[0]) / (extent_x[1] - extent_x[0]);
