@@ -9,7 +9,6 @@
         <p class="title">{{ this.firstTeam }}</p>
       </div>
     </transition>
-    
 
     <transition name="fade" mode="out-in">
       <div class="parent-secondary-card" :key="drivers.length">
