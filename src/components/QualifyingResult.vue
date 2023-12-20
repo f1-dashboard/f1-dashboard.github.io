@@ -5,6 +5,20 @@
     </div>
 </template>
 
+<style>
+.delta {
+    cursor: pointer;
+}
+
+.bar {
+    cursor: pointer;
+}
+
+.name {
+    cursor: pointer;
+}
+</style>
+
 <script>
 import * as d3 from "d3";
 
@@ -70,7 +84,7 @@ export default {
             if (!relativeTo) {
                 relativeTo = drivers[0].full_name
             }
-            
+
             // ensure other components are loaded before emitting driver event
             setTimeout(() => {
                 if (this.setDrivers != undefined && this.setDrivers.length == 2) {
@@ -93,7 +107,7 @@ export default {
                 .on("click", (d, i) => this.update(i.full_name))
                 .merge(bars)
                 .transition(t)
-                .attr("class", d => d.team)
+                .attr("class", d => `${d.team} bar`)
                 .attr("x", d => this.x(Math.min(d.delta, 0)))
                 .attr("y", d => this.y(d.full_name))
                 .attr("width", d => Math.abs(this.x(d.delta) - this.x(0)))
@@ -106,6 +120,7 @@ export default {
             timing_labels.enter()
                 .append("text")
                 .merge(timing_labels)
+                .on("click", (d, i) => this.update(i.full_name))
                 .attr("fill", "white")
                 .classed("delta", true)
                 .transition(t)
@@ -139,7 +154,7 @@ export default {
                     .attr("text-anchor", "start")
                     .attr("x", 6))
                 .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i]?.delta >= 0)
-                    .attr("text-anchor", "end"));
+                    .attr("text-anchor", "end"))
         },
 
         async init() {
