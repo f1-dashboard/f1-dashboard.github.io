@@ -38,7 +38,8 @@ const updateRound = (newRound) => {
     </div>
 
     <div class="right">
-      <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
+      <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers"
+        :qualifying="quali" />
       <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers"
         :qualifying="quali" />
       <Introduction />

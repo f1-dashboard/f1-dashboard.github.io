@@ -48,6 +48,9 @@ export default {
         },
         circuit: {
             default: 1
+        },
+        qualifying: {
+            default: "Q1"
         }
     },
     watch: {
@@ -67,6 +70,10 @@ export default {
             this.set_drivers(this.drivers)
             this.set_distance(this.distance_highlight)
         },
+        qualifying: function (newVal, oldVal) {
+            this.set_drivers(this.drivers)
+            this.set_distance(this.distance_highlight)
+        }
     },
     async mounted() {
         await this.init()
@@ -148,19 +155,20 @@ export default {
 
         set_drivers(drivers) {
             this.filtered_data = new Map();
-            for (const driver_data of this.pixel_data.values()) {
+            for (const driver_data of this.pixel_data[this.qualifying].values()) {
                 if (drivers.includes(driver_data.full_name)) {
-
                     this.filtered_data.set(driver_data.full_name, driver_data)
                 }
             }
 
 
+            const t = this.svg.transition().duration(750)
             this.driver_lines
                 .selectAll("path")
                 .data(this.filtered_data.values())
                 .join("path")
                 .style("mix-blend-mode", "multiply")
+                .transition(t)
                 .attr("d", this.line)
                 .style("stroke", d => colors[d.team])
         },
@@ -170,15 +178,21 @@ export default {
             d3.select('#trackspeedvis').selectAll('svg').remove();
 
             // Load data
-            this.data_raw = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
-                let driver = {
-                    full_name: d.FullName,
-                    team: d.TeamId,
-                    dist: parseFloat(d.Distance),
-                    speed: parseFloat(d.Speed),
-                };
-                return driver
-            });
+            this.data_raw = {}
+            for (const q of ['Q1', 'Q2', 'Q3']) {
+                // Load data
+                this.data_raw[q] = await d3.csv(`../data/${this.circuit}/fastest_laps_${q.toLowerCase()}.csv`, d => {
+                    let driver = {
+                        full_name: d.FullName,
+                        team: d.TeamId,
+                        dist: parseFloat(d.Distance),
+                        speed: parseFloat(d.Speed),
+                    };
+                    return driver
+                });
+
+
+            }
 
             // Declare the chart dimensions and margins.
             const marginTop = 20;
@@ -188,15 +202,14 @@ export default {
             const width = 640;
             const height = 350;
 
-            this.maxX = d3.max(this.data_raw, d => d.dist)
+            this.maxX = d3.max(this.data_raw[this.qualifying], d => d.dist)
             // Declare the scales
             this.x = d3.scaleLinear()
                 .domain([0, this.maxX]).nice()
                 .range([marginLeft, width - marginRight])
 
             this.y = d3.scaleLinear()
-                // .domain(d3.extent(this.data_raw, d => d.speed)).nice()
-                .domain([0, d3.max(this.data_raw, d => d.speed)]).nice()
+                .domain([0, d3.max(this.data_raw[this.qualifying], d => d.speed)]).nice()
                 .range([height - marginBottom, marginTop])
 
             // Create the SVG container.
@@ -216,11 +229,14 @@ export default {
                 .attr("transform", `translate(${marginLeft},0)`)
                 .call(d3.axisLeft(this.y));
 
-            // compute poitns in pixel space [x, y, z] where z is the driver 
-            this.points = this.data_raw.map(d => [this.x(d.dist), this.y(d.speed), d.full_name, d.team, d.dist, d.speed])
+            this.pixel_data = {}
+            for (const q of ['Q1', 'Q2', 'Q3']) {
+                // compute poitns in pixel space [x, y, z] where z is the driver 
+                const pxPoints = this.data_raw[q].map(d => [this.x(d.dist), this.y(d.speed), d.full_name, d.team, d.dist, d.speed])
 
-            // create map of driver name -> track points
-            this.pixel_data = d3.rollup(this.points, v => Object.assign(v, { full_name: v[0][2], team: v[0][3] }), d => d[2])
+                // create map of driver name -> track points
+                this.pixel_data[q] = d3.rollup(pxPoints, v => Object.assign(v, { full_name: v[0][2], team: v[0][3] }), d => d[2])
+            }
 
             // draw distance line highlight
             this.distance_line = this.svg

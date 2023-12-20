@@ -61,6 +61,9 @@ export default {
     },
     watch: {
         distance_highlight: function (newVal, oldVal) {
+            if (!this.loaded) {
+                return
+            }
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
@@ -85,9 +88,8 @@ export default {
         }
     },
     async mounted() {
-        this.mounted = false
         await this.init()
-        this.mounted = true
+        this.set_drivers(this.drivers)
     },
     methods: {
         // Update the line + dots visualization based on x value
