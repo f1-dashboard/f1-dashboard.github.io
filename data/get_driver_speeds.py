@@ -10,48 +10,114 @@ def rotate(xy, *, angle):
     return np.matmul(xy, rot_mat)
 
 
-session = fastf1.get_session(2023, 'Monza', 'Q')
+for i in range(22, 23):
+    session = fastf1.get_session(2023, i, 'Q')
 
-session.load()
-circuit_info = session.get_circuit_info()
-track_angle = circuit_info.rotation / 180 * np.pi
-
-
-drivers = session.drivers
-laps = []
-
-for driver in drivers:
-    driver_info = session.get_driver(driver)
-    fastest_lap = session.laps.pick_driver(driver).pick_fastest().get_telemetry()
-    xy = fastest_lap.loc[:, ('X', 'Y')].to_numpy()
-    xy_rotated = rotate(xy, angle=track_angle)
-    fastest_lap.drop(columns=['X', 'Y'], inplace=True)
-    fastest_lap.insert(0, "X", xy_rotated[:, 0], False)
-    fastest_lap.insert(1, "Y", xy_rotated[:, 1], False)
-    fastest_lap.insert(0, "FullName", [driver_info.FullName] * fastest_lap.shape[0], False)
-    fastest_lap.insert(1, "TeamId", [driver_info.TeamId] * fastest_lap.shape[0], False)
-    laps.append(fastest_lap)
+    session.load()
+    circuit_info = session.get_circuit_info()
+    track_angle = circuit_info.rotation / 180 * np.pi
 
 
+    drivers = session.drivers
+    laps = []
 
-fastest_laps = pd.concat(laps)
-print(fastest_lap.columns)
+    for driver in drivers:
+        driver_info = session.get_driver(driver)
+        q1, q2, q3 = session.laps.pick_driver(driver).split_qualifying_sessions() #
+        try:
+            fastest_lap = q1.pick_fastest().get_telemetry()
+        except AttributeError:
+            continue
+        except KeyError:
+            continue
+        xy = fastest_lap.loc[:, ('X', 'Y')].to_numpy()
+        xy_rotated = rotate(xy, angle=track_angle)
+        fastest_lap.drop(columns=['X', 'Y'], inplace=True)
+        fastest_lap.insert(0, "X", xy_rotated[:, 0], False)
+        fastest_lap.insert(1, "Y", xy_rotated[:, 1], False)
+        fastest_lap.insert(0, "FullName", [driver_info.FullName] * fastest_lap.shape[0], False)
+        fastest_lap.insert(1, "TeamId", [driver_info.TeamId] * fastest_lap.shape[0], False)
+        laps.append(fastest_lap)
 
-# for fastest lap, "Status" is always "OnTrack"
-columns_to_remove = ['DriverAhead', 'DistanceToDriverAhead', 'SessionTime', 'Date', 'Status']
-fastest_laps.drop(columns=columns_to_remove, inplace=True)
-fastest_laps.to_csv("monza_2023_fastest_laps.csv")
+    fastest_laps = pd.concat(laps)
+    print(fastest_lap.columns)
 
-# fast_leclerc = session.laps.pick_driver('LEC').pick_fastest()
-# lec_car_data = fast_leclerc.get_car_data()
-# t = lec_car_data['Time']
-# vCar = lec_car_data['Speed']
+    columns_to_remove = ['DriverAhead', 'DistanceToDriverAhead', 'SessionTime', 'Date', 'Status']
+    fastest_laps.drop(columns=columns_to_remove, inplace=True)
+    fastest_laps.to_csv("public/data/" + str(i) + "/fastest_laps_q1.csv")
 
-# # The rest is just plotting
-# fig, ax = plt.subplots()
-# ax.plot(t, vCar, label='Fast')
-# ax.set_xlabel('Time')
-# ax.set_ylabel('Speed [Km/h]')
-# ax.set_title('Leclerc is')
-# ax.legend()
-# plt.show()
+    session = fastf1.get_session(2023, i, 'Q')
+
+    session.load()
+    circuit_info = session.get_circuit_info()
+    track_angle = circuit_info.rotation / 180 * np.pi
+
+
+    drivers = session.drivers
+    laps = []
+
+
+    for driver in drivers:
+        driver_info = session.get_driver(driver)
+        q1, q2, q3 = session.laps.pick_driver(driver).split_qualifying_sessions() #
+        try:
+            fastest_lap = q2.pick_fastest().get_telemetry()
+        except AttributeError:
+            continue
+        except KeyError:
+            continue
+        except ValueError:
+            continue
+        xy = fastest_lap.loc[:, ('X', 'Y')].to_numpy()
+        xy_rotated = rotate(xy, angle=track_angle)
+        fastest_lap.drop(columns=['X', 'Y'], inplace=True)
+        fastest_lap.insert(0, "X", xy_rotated[:, 0], False)
+        fastest_lap.insert(1, "Y", xy_rotated[:, 1], False)
+        fastest_lap.insert(0, "FullName", [driver_info.FullName] * fastest_lap.shape[0], False)
+        fastest_lap.insert(1, "TeamId", [driver_info.TeamId] * fastest_lap.shape[0], False)
+        laps.append(fastest_lap)
+
+    fastest_laps = pd.concat(laps)
+    print(fastest_lap.columns)
+
+    columns_to_remove = ['DriverAhead', 'DistanceToDriverAhead', 'SessionTime', 'Date', 'Status']
+    fastest_laps.drop(columns=columns_to_remove, inplace=True)
+    fastest_laps.to_csv("public/data/" + str(i) + "/fastest_laps_q2.csv")
+
+
+    session = fastf1.get_session(2023, i, 'Q')
+
+    session.load()
+    circuit_info = session.get_circuit_info()
+    track_angle = circuit_info.rotation / 180 * np.pi
+
+
+    drivers = session.drivers
+    laps = []
+
+    for driver in drivers:
+        driver_info = session.get_driver(driver)
+        q1, q2, q3 = session.laps.pick_driver(driver).split_qualifying_sessions() #
+        try:
+            fastest_lap = q3.pick_fastest().get_telemetry()
+        except AttributeError:
+            continue
+        except KeyError:
+            continue
+        except ValueError:
+            continue
+        xy = fastest_lap.loc[:, ('X', 'Y')].to_numpy()
+        xy_rotated = rotate(xy, angle=track_angle)
+        fastest_lap.drop(columns=['X', 'Y'], inplace=True)
+        fastest_lap.insert(0, "X", xy_rotated[:, 0], False)
+        fastest_lap.insert(1, "Y", xy_rotated[:, 1], False)
+        fastest_lap.insert(0, "FullName", [driver_info.FullName] * fastest_lap.shape[0], False)
+        fastest_lap.insert(1, "TeamId", [driver_info.TeamId] * fastest_lap.shape[0], False)
+        laps.append(fastest_lap)
+
+    fastest_laps = pd.concat(laps)
+    print(fastest_lap.columns)
+
+    columns_to_remove = ['DriverAhead', 'DistanceToDriverAhead', 'SessionTime', 'Date', 'Status']
+    fastest_laps.drop(columns=columns_to_remove, inplace=True)
+    fastest_laps.to_csv("public/data/" + str(i) + "/fastest_laps_q3.csv")
