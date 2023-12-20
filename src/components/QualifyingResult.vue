@@ -158,10 +158,10 @@ export default {
                     .attr("x", 6))
                 .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i]?.delta >= 0)
                     .attr("text-anchor", "end"))
-                .call(g => g.selectAll(".tick text").filter((d, i) => setDrivers.includes(drivers[i]?.full_name))
-                    .attr("color", "red"))
-                .call(g => g.selectAll(".tick text").filter((d, i) => !setDrivers.includes(drivers[i]?.full_name))
-                    .attr("color", "black"))
+            // .call(g => g.selectAll(".tick text").filter((d, i) => setDrivers.includes(drivers[i]?.full_name))
+            //     .attr("color", "red"))
+            // .call(g => g.selectAll(".tick text").filter((d, i) => !setDrivers.includes(drivers[i]?.full_name))
+            //     .attr("color", "black"))
         },
 
         async init() {
