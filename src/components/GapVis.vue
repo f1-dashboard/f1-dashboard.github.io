@@ -80,7 +80,6 @@ export default {
             if (!this.loaded) {
                 return
             }
-            console.log("dgaf")
             this.set_drivers(this.drivers)
             this.set_distance(this.distance_highlight)
         }
