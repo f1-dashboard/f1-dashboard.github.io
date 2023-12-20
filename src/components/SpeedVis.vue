@@ -180,7 +180,6 @@ export default {
             // Load data
             this.data_raw = {}
             for (const q of ['Q1', 'Q2', 'Q3']) {
-                // Load data
                 this.data_raw[q] = await d3.csv(`../data/${this.circuit}/fastest_laps_${q.toLowerCase()}.csv`, d => {
                     let driver = {
                         full_name: d.FullName,
@@ -190,8 +189,6 @@ export default {
                     };
                     return driver
                 });
-
-
             }
 
             // Declare the chart dimensions and margins.

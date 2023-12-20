@@ -34,7 +34,8 @@ const updateRound = (newRound) => {
     </div>
 
     <div class="center">
-      <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance" />
+      <TrackVis :drivers=drivers :circuit=round @EmitDistance="(n) => distance = n" :distance_highlight="distance"
+        :qualifying="quali" />
     </div>
 
     <div class="right">

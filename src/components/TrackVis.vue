@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h2>{{ drivers[0] }}'s fastest lap</h2>
+        <h2>{{ drivers[0] }}'s fastest lap in {{ qualifying }}</h2>
         <div id="trackvis"></div>
         <input type="checkbox" id="brakingCheckbox">
         <label for="brakingCheckbox"> Show Braking</label>
@@ -34,11 +34,11 @@ const colors = {
 }
 
 export default {
-    props: ['drivers', 'circuit', 'distance_highlight'],
+    props: ['drivers', 'circuit', 'distance_highlight', 'qualifying'],
 
     watch: {
         drivers: function (newVal, oldVal) {
-            if (!this.driver_data) {
+            if (!this.mounted) {
                 return
             }
             this.visualizeTrack();
@@ -52,12 +52,23 @@ export default {
         },
         distance_highlight: function (newVal, oldVal) {
             this.updateDistancePoint(newVal)
+        },
+        qualifying: function (newVal, oldVal) {
+            if (!this.mounted) {
+                return
+            }
+            this.visualizeTrack();
+            const checkbox = document.getElementById('brakingCheckbox');
+            if (checkbox.checked) {
+                this.drawBrakingLines()
+            }
         }
     },
 
     async mounted() {
         await this.init()
         this.visualizeTrack()
+        this.mounted = true
     },
     methods: {
         calculateDistance(point1, point2) {
@@ -95,7 +106,9 @@ export default {
         },
 
         visualizeTrack() {
-            const telemetry_data = d3.filter(this.driver_data, d => d.FullName == this.drivers[0])
+            console.log(this.driver_data[this.qualifying], this.drivers)
+            const telemetry_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName == this.drivers[0])
+            console.log(telemetry_data)
             const [minSpeed, maxSpeed] = d3.extent(telemetry_data, d => +d.Speed)
 
             // define color range
@@ -207,7 +220,10 @@ export default {
             this.svg.selectAll('.legend-braking-line').remove();
 
             const drawBrakingLine = (driverName, stroke_width, legend_y, color = undefined) => {
-                const telemetry_data = d3.filter(this.driver_data, d => d.FullName === driverName && d.Brake === 'True')
+                const telemetry_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName === driverName && d.Brake === 'True')
+                if (telemetry_data.length === 0) {
+                    return
+                }
                 if (!color) {
                     color = colors[telemetry_data[0].TeamId]
                 }
@@ -292,7 +308,11 @@ export default {
                 return { X: +d.X, Y: +d.Y, Distance: +d.Distance }
             });
 
-            this.driver_data = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv")
+            // Load data
+            this.driver_data = {}
+            for (const q of ['Q1', 'Q2', 'Q3']) {
+                this.driver_data[q] = await d3.csv(`../data/${this.circuit}/fastest_laps_${q.toLowerCase()}.csv`);
+            }
 
             const extent_x = d3.extent(this.circuit_data, d => d.X)
             const extent_y = d3.extent(this.circuit_data, d => d.Y)
