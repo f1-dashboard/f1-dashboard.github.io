@@ -28,7 +28,7 @@
         </div>
 
         <div v-else class="add-wrapper" ref="exceptionElement">
-          <div class="add-driver" @click="console.log(open); open = !open">
+          <div class="add-driver" @click="open = !open">
             <span class="plus-symbol">+</span>
           </div>
         </div>
@@ -209,10 +209,15 @@ export default {
   border-bottom: 1px solid black;
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-enter-active,
+.fade-leave-active {
   transition: opacity .2s;
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+
+.fade-enter,
+.fade-leave-to
+
+/* .fade-leave-active below version 2.1.8 */
+  {
   opacity: 0;
-}
-</style>
+}</style>
