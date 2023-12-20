@@ -165,7 +165,6 @@ export default {
             // compute gap between drivers
             let maxGap = 0.1
             this.relative_data_px = new Map()
-            console.log(this.data)
             for (let i = 0; i < drivers.length; i++) {
                 if (this.data[this.qualifying].get(drivers[i]) === undefined || this.data[this.qualifying].get(drivers[0]) === undefined) {
                     console.warn(`Driver ${drivers[i]} not in data`)
@@ -261,7 +260,6 @@ export default {
                 .domain([0, this.maxX]).nice()
                 .range([marginLeft, width - marginRight])
 
-            console.log("here")
             this.y = d3.scaleLinear()
                 .domain([-3, +3]).nice()
                 .range([height - marginBottom, marginTop])

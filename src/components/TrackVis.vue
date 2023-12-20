@@ -106,9 +106,7 @@ export default {
         },
 
         visualizeTrack() {
-            console.log(this.driver_data[this.qualifying], this.drivers)
             const telemetry_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName == this.drivers[0])
-            console.log(telemetry_data)
             const [minSpeed, maxSpeed] = d3.extent(telemetry_data, d => +d.Speed)
 
             // define color range
