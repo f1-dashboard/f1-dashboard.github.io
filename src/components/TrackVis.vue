@@ -25,16 +25,17 @@ export default {
 
     watch: {
         drivers: function (newVal, oldVal) {
-            console.log('drivers changed: ', newVal, ' | was: ', oldVal);
+            if (!this.driver_data) {
+                return
+            }
             this.visualizeTrack();
             const checkbox = document.getElementById('brakingCheckbox');
             if (checkbox.checked) {
                 this.drawBrakingLines()
             }
         },
-        circuit: function (newVal, oldVal) {
-            console.log('Circuit changed: ', newVal, ' | was: ', oldVal);
-            this.init();
+        circuit: async function (newVal, oldVal) {
+            await this.init();
         },
         distance_highlight: function (newVal, oldVal) {
             this.updateDistancePoint(newVal)
@@ -47,8 +48,8 @@ export default {
     },
     methods: {
         calculateDistance(point1, point2) {
-            const dx = point1.x - point2.x;
-            const dy = point1.y - point2.y;
+            const dx = point1.X - point2.X;
+            const dy = point1.Y - point2.Y;
             // return Math.sqrt(dx * dx + dy * dy);
             return dx * dx + dy * dy
         },
@@ -64,23 +65,24 @@ export default {
         updateDistancePoint(distance) {
             this.circle.selectAll().remove()
 
-            const closest = d3.least(this.data, d => Math.abs(distance - d.dist))
+            const closest = d3.least(this.circuit_data, d => Math.abs(distance - d.Distance))
 
             this.circle
                 .selectAll("circle")
                 .data([closest])
                 .join("circle")
-                .attr("cx", d => this.x(d.x))
-                .attr("cy", d => this.y(d.y))
+                .attr("cx", d => this.x(d.X))
+                .attr("cy", d => this.y(d.Y))
                 .attr("r", 5);
         },
 
         distanceEvent(point) {
-            const closest = d3.least(this.data, d => this.calculateDistance(point, d))
-            this.$emit('EmitDistance', closest.dist)
+            const closest = d3.least(this.circuit_data, d => this.calculateDistance(point, d))
+            this.$emit('EmitDistance', closest.Distance)
         },
-        async visualizeTrack() {
-            const telemetry_data = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => { if (d.FullName == this.drivers[0]) return d })
+
+        visualizeTrack() {
+            const telemetry_data = d3.filter(this.driver_data, d => d.FullName == this.drivers[0])
             const [minSpeed, maxSpeed] = d3.extent(telemetry_data, d => +d.Speed)
 
             // define color range
@@ -175,11 +177,8 @@ export default {
 
         },
 
-        async drawBrakingLines() {
-            const telemetry_data = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
-                if (d.FullName == this.drivers[0])
-                    return d
-            })
+        drawBrakingLines() {
+            const telemetry_data = d3.filter(this.driver_data, d => d.FullName == this.drivers[0])
 
             this.svg.selectAll('.braking-line').remove();
             this.svg.selectAll('.legend-braking-line').remove();
@@ -198,7 +197,7 @@ export default {
                         .attr("opacity", 1)
                 }
             });
-            
+
             const legendDrivers = this.speedLine.append("g")
                 .attr("class", "legend-braking-line")
                 .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
@@ -219,10 +218,8 @@ export default {
             LegendDriversText2.text(`${this.drivers[0]}`);
 
             if (this.drivers.length == 2) {
-                const telemetry_data_2 = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
-                    if (d.FullName == this.drivers[1])
-                        return d
-                });
+                const telemetry_data_2 = d3.filter(this.driver_data, d => d.FullName == this.drivers[1])
+
                 telemetry_data_2.forEach((data, index) => {
                     if (data.Brake == 'True') {
                         this.brakeLine.append("line")
@@ -259,12 +256,14 @@ export default {
             d3.select('#trackvis').selectAll('svg').remove();
 
             // Load data
-            this.data = await d3.csv("../data/" + this.circuit + "/circuit.csv", d => {
-                return { x: parseFloat(d.X), y: parseFloat(d.Y), dist: parseFloat(d.Distance) }
+            this.circuit_data = await d3.csv("../data/" + this.circuit + "/circuit.csv", d => {
+                return { X: +d.X, Y: +d.Y, Distance: +d.Distance }
             });
 
-            const extent_x = d3.extent(this.data, d => d.x)
-            const extent_y = d3.extent(this.data, d => d.y)
+            this.driver_data = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv")
+
+            const extent_x = d3.extent(this.circuit_data, d => d.X)
+            const extent_y = d3.extent(this.circuit_data, d => d.Y)
 
             // Declare the chart dimensions and margins.
             const marginTop = 20;
@@ -287,8 +286,7 @@ export default {
             // track line
             this.track = d3.line()
                 .curve(d3.curveCatmullRomClosed)
-                .x(d => this.x(d.x))
-                .y(d => this.y(d.y))
+                .x(d => this.x(d.X)).y(d => this.y(d.Y))
 
             // Create the SVG container.
             this.svg = d3.create("svg")
@@ -297,18 +295,18 @@ export default {
                 .attr("viewBox", [0, 0, width, height])
                 .attr("style", "max-width: 100%; height: auto;")
                 .on("mousemove", event => {
-                    let [x, y] = d3.pointer(event)
-                    x = this.x.invert(x)
-                    y = this.y.invert(y)
+                    let [X, Y] = d3.pointer(event)
+                    X = this.x.invert(X)
+                    Y = this.y.invert(Y)
 
-                    const point = { x, y }
-                    const closest = d3.least(this.data, d => this.calculateDistance(point, d))
+                    const point = { X, Y }
+                    const closest = d3.least(this.circuit_data, d => this.calculateDistance(point, d))
 
                     const distance = Math.sqrt(this.calculateDistance(point, closest));
 
                     if (distance < 1000) {
                         // calls updateDistancePoint
-                        this.distanceEvent({ x: x, y: y })
+                        this.distanceEvent({ X, Y })
                     }
                 })
 
@@ -325,10 +323,10 @@ export default {
 
 
             const length = (path) => d3.create("svg:path").attr("d", path).node().getTotalLength()
-            const l = length(this.track(this.data));
+            const l = length(this.track(this.circuit_data));
 
             this.svg.append("path")
-                .datum(this.data)
+                .datum(this.circuit_data)
                 .attr("fill", "none")
                 .attr("stroke", "black")
                 .attr("stroke-width", 9)
