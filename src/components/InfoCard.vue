@@ -13,36 +13,36 @@
 
     <transition name="fade" mode="out-in">
       <div class="parent-secondary-card" :key="drivers.length">
-      <div v-if="this.drivers[1]" class="card">
-        <img :src="this.secondUrl" style="width:100%">
-        <h1 style="font-size: 10px">{{ this.drivers[1] }}</h1>
-        <p class="title">{{ this.secondTeam }}</p>
-        <button class="close-button" @click="$emit('emitDrivers', [this.drivers[0]])">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-x-square">
-            <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-            <path d="m15 9-6 6" />
-            <path d="m9 9 6 6" />
-          </svg>
-        </button>
-      </div>
+        <div v-if="this.drivers[1]" class="card">
+          <img :src="this.secondUrl" style="width:100%">
+          <h1 style="font-size: 10px">{{ this.drivers[1] }}</h1>
+          <p class="title">{{ this.secondTeam }}</p>
+          <button class="close-button" @click="$emit('emitDrivers', [this.drivers[0]])">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-x-square">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <path d="m15 9-6 6" />
+              <path d="m9 9 6 6" />
+            </svg>
+          </button>
+        </div>
 
-      <div v-else class="add-wrapper" ref="exceptionElement">
-        <div class="add-driver" @click="console.log(open); open = !open">
-          <span class="plus-symbol">+</span>
+        <div v-else class="add-wrapper" ref="exceptionElement">
+          <div class="add-driver" @click="console.log(open); open = !open">
+            <span class="plus-symbol">+</span>
+          </div>
+        </div>
+
+        <div class="items" :class="{ selectHide: !open }" ref="targetElement">
+          <div v-for="(drvr, i) of availableDrivers" :key="i" @click="
+            open = false;
+          $emit('emitDrivers', [this.drivers[0], drvr.driverName]);
+          ">
+            {{ drvr.driverName }}
+          </div>
         </div>
       </div>
-
-      <div class="items" :class="{ selectHide: !open }" ref="targetElement">
-        <div v-for="(drvr, i) of availableDrivers" :key="i" @click="
-          open = false;
-        $emit('emitDrivers', [this.drivers[0], drvr.driverName]);
-        ">
-          {{ drvr.driverName }}
-        </div>
-      </div>
-    </div>
     </transition>
   </div>
 </template>
