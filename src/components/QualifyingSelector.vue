@@ -24,7 +24,6 @@ export default {
             const movingLine = this.$refs.underline;
             if (targetSpan && movingLine) {
                 const targetPosition = targetSpan.offsetLeft;
-                console.log(targetPosition)
                 movingLine.style.left = targetPosition + 'px';
             }
             movingLine.style.transition = "left 0.2s ease"

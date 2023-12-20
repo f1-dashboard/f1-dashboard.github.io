@@ -30,7 +30,7 @@ const updateRound = (newRound) => {
   <div class="content">
     <div class="left">
       <InfoCard id="ic" @emitDrivers="(n) => drivers = n" :drivers=drivers />
-      <QualifyingResult :qualifying=quali :circuit=round :setDrivers = drivers @EmitDriver="(n) => drivers = n" />
+      <QualifyingResult :qualifying=quali :circuit=round :setDrivers=drivers @EmitDriver="(n) => drivers = n" />
     </div>
 
     <div class="center">
@@ -39,7 +39,8 @@ const updateRound = (newRound) => {
 
     <div class="right">
       <SpeedVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
-      <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers" />
+      <GapVis :distance_highlight="distance" @DistanceChanged="(n) => distance = n" :circuit=round :drivers="drivers"
+        :qualifying="quali" />
       <Introduction />
     </div>
   </div>

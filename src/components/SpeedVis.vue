@@ -71,10 +71,8 @@ export default {
             this.set_distance(newVal)
         },
         drivers: function (newVal, oldVal) {
-            console.log(newVal)
             // Don't listen to driver updates if data hasn't been loaded
-            if (!this.pixel_data) {
-                console.log("not loaded")
+            if (!this.mounted) {
                 return
             }
             this.set_drivers(newVal)
@@ -89,6 +87,7 @@ export default {
     async mounted() {
         await this.init()
         this.set_drivers(['Carlos Sainz'])
+        this.mounted = true
     },
     methods: {
         set_relative_to(driver) {
@@ -128,7 +127,6 @@ export default {
                 )
 
                 const relativeSpeedCurve = this.filtered_data.get(name).map(d => {
-                    // console.log(interp.getPointAt(d[4] / max_dist)[0], d[4])
                     return [this.x(d[4]), this.y(d[5] - interp.getPointAt(d[4] / max_dist)[1])]
                 })
                 relativeSpeedCurve["full_name"] = name
@@ -136,9 +134,7 @@ export default {
 
                 relativeSpeedBasis["full_name"] = name
                 relativeSpeedBasis["team"] = driver_data.team
-                // console.log(relativeSpeedBasis)
 
-                // console.log(relativeSpeedLinear)
                 relativeSpeedLinear["full_name"] = name
                 relativeSpeedLinear["team"] = driver_data.team
 

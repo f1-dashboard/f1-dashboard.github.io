@@ -57,26 +57,24 @@ export default {
             default: 1
         },
         setDrivers: {
-            default: []
+            default: [null]
         }
     },
     watch: {
         qualifying: function (newVal, oldVal) {
-            this.update(null)
-            console.log('Prop changed: ', newVal, ' | was: ', oldVal)
+            this.update(this.setDrivers[0])
         },
         circuit: async function (newVal, oldVal) {
             await this.init()
             this.update(null)
-            console.log('Prop changed: ', newVal, ' | was: ', oldVal)
-        }
+        },
     },
     async mounted() {
         await this.init()
-        this.update(null)
+        this.update(null, true)
     },
     methods: {
-        update(relativeTo) {
+        update(relativeTo, defer = false) {
             const drivers = this.getDriverData(this.qualifying, relativeTo)
             const format = d3.format("+.3")
             const eps = 0.0000001
@@ -86,13 +84,18 @@ export default {
             }
 
             // ensure other components are loaded before emitting driver event
-            setTimeout(() => {
-                if (this.setDrivers != undefined && this.setDrivers.length == 2) {
-                    this.$emit('EmitDriver', [relativeTo, this.setDrivers[1]]);
-                } else {
-                    this.$emit('EmitDriver', [relativeTo]);
-                }
-            }, 100)
+            let setDrivers = []
+            if (this.setDrivers != undefined && this.setDrivers.length == 2) {
+                setDrivers = [relativeTo, this.setDrivers[1]]
+            } else {
+                setDrivers = [relativeTo]
+            }
+
+            if (defer) {
+                setTimeout(() => this.$emit('EmitDriver', setDrivers), 100)
+            } else {
+                this.$emit('EmitDriver', setDrivers)
+            }
 
             // Update axis domains
             this.x.domain(d3.extent(drivers, d => d.delta))
@@ -155,6 +158,10 @@ export default {
                     .attr("x", 6))
                 .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i]?.delta >= 0)
                     .attr("text-anchor", "end"))
+                .call(g => g.selectAll(".tick text").filter((d, i) => setDrivers.includes(drivers[i]?.full_name))
+                    .attr("color", "red"))
+                .call(g => g.selectAll(".tick text").filter((d, i) => !setDrivers.includes(drivers[i]?.full_name))
+                    .attr("color", "black"))
         },
 
         async init() {
@@ -247,7 +254,6 @@ export default {
                 relativeTime = d3.min(driversInQuali, d => d[quali].lap_time)
             }
             driversInQuali.forEach(d => d.delta = (d[quali].lap_time - relativeTime))
-            console.log(driversInQuali)
             return d3.sort(driversInQuali, d => d.delta)
         }
     }

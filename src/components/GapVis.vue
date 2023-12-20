@@ -54,6 +54,9 @@ export default {
         },
         circuit: {
             default: 1
+        },
+        qualifying: {
+            default: "Q1"
         }
     },
     watch: {
@@ -62,7 +65,7 @@ export default {
         },
         drivers: function (newVal, oldVal) {
             // Don't listen to driver updates if data hasn't been loaded
-            if (!this.data) {
+            if (!this.loaded) {
                 return
             }
             this.set_drivers(newVal)
@@ -72,10 +75,20 @@ export default {
             await this.init()
             this.set_drivers(this.drivers)
             this.set_distance(this.distance_highlight)
+        },
+        qualifying: function (newVal, oldVal) {
+            if (!this.loaded) {
+                return
+            }
+            console.log("dgaf")
+            this.set_drivers(this.drivers)
+            this.set_distance(this.distance_highlight)
         }
     },
     async mounted() {
+        this.mounted = false
         await this.init()
+        this.mounted = true
     },
     methods: {
         // Update the line + dots visualization based on x value
@@ -129,7 +142,7 @@ export default {
         },
 
         get_interpolated_time(driver, dist) {
-            const data = this.data.get(driver)
+            const data = this.data[this.qualifying].get(driver)
             let i = 0;
             while (i < data.length && data[i][0] < dist) {
                 i++;
@@ -151,12 +164,13 @@ export default {
             // compute gap between drivers
             let maxGap = 0.1
             this.relative_data_px = new Map()
+            console.log(this.data)
             for (let i = 0; i < drivers.length; i++) {
-                if (this.data.get(drivers[i]) === undefined) {
+                if (this.data[this.qualifying].get(drivers[i]) === undefined || this.data[this.qualifying].get(drivers[0]) === undefined) {
                     console.warn(`Driver ${drivers[i]} not in data`)
                     continue
                 }
-                const gapData = this.data.get(drivers[i]).map(d => {
+                const gapData = this.data[this.qualifying].get(drivers[i]).map(d => {
                     const gap = this.get_interpolated_time(drivers[0], d[0]) - d[1]
 
                     if (gap > maxGap) {
@@ -178,7 +192,7 @@ export default {
             for (const driver of this.relative_data_px) {
                 const gapPXdata = this.relative_data_px.get(driver[0]).map(([x, y]) => [this.x(x), this.y(y)])
                 gapPXdata["full_name"] = driver[0]
-                gapPXdata["team"] = this.data.get(driver[0]).team
+                gapPXdata["team"] = this.data[this.qualifying].get(driver[0]).team
                 this.relative_data_px.set(driver[0], gapPXdata)
             }
 
@@ -202,30 +216,35 @@ export default {
             // Clear existing SVG element (if any)
             d3.select('#container').selectAll('svg').remove();
 
-            // Load data
-            this.data_raw = await d3.csv("../data/" + this.circuit + "/fastest_laps.csv", d => {
-                const time = parseTimeString(d.Time).time
+            this.data_raw = {}
+            this.data = {}
+            for (const q of ['Q1', 'Q2', 'Q3']) {
 
-                if (!time) {
-                    return null
-                }
-                let driver = {
-                    full_name: d.FullName,
-                    team: d.TeamId,
-                    dist: parseFloat(d.Distance),
-                    time: time ? time : 0,
-                };
+                // Load data
+                this.data_raw[q] = await d3.csv(`../data/${this.circuit}/fastest_laps_${q.toLowerCase()}.csv`, d => {
+                    const time = parseTimeString(d.Time).time
 
-                return driver
-            });
+                    if (!time) {
+                        return null
+                    }
+                    let driver = {
+                        full_name: d.FullName,
+                        team: d.TeamId,
+                        dist: parseFloat(d.Distance),
+                        time: time ? time : 0,
+                    };
 
-            // Roll up data as a mapping between driver -> array of (dist, speed)
-            // the array also contains properites full_name and team
-            this.data = d3.rollup(this.data_raw, v => {
-                const full_name = v[0].full_name
-                const team = v[0].team
-                return Object.assign(v.map(d => [d.dist, d.time]), { full_name, team })
-            }, d => d.full_name)
+                    return driver
+                });
+
+                // Roll up data as a mapping between driver -> array of (dist, speed)
+                // the array also contains properites full_name and team
+                this.data[q] = d3.rollup(this.data_raw[q], v => {
+                    const full_name = v[0].full_name
+                    const team = v[0].team
+                    return Object.assign(v.map(d => [d.dist, d.time]), { full_name, team })
+                }, d => d.full_name)
+            }
 
             // Declare the chart dimensions and margins.
             const marginTop = 20;
@@ -235,12 +254,13 @@ export default {
             const width = 640;
             const height = 250;
 
-            this.maxX = d3.max(this.data_raw, d => d.dist)
+            this.maxX = d3.max(this.data_raw.Q1, d => d.dist)
             // Declare the scales
             this.x = d3.scaleLinear()
                 .domain([0, this.maxX]).nice()
                 .range([marginLeft, width - marginRight])
 
+            console.log("here")
             this.y = d3.scaleLinear()
                 .domain([-3, +3]).nice()
                 .range([height - marginBottom, marginTop])
@@ -312,6 +332,7 @@ export default {
             this.showDistanceLine()
 
             container.append(this.svg.node())
+            this.loaded = true
         },
 
         // Update dots

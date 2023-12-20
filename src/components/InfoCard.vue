@@ -74,7 +74,7 @@ export default {
       const targetElement = this.$refs.targetElement;
       const exceptionElement = this.$refs.exceptionElement;
 
-      if (!targetElement.contains(event.target) && !exceptionElement.contains(event.target)) {
+      if (!targetElement?.contains(event.target) && !exceptionElement?.contains(event.target)) {
         this.open = false;
       }
     },
@@ -220,4 +220,5 @@ export default {
 /* .fade-leave-active below version 2.1.8 */
   {
   opacity: 0;
-}</style>
+}
+</style>
