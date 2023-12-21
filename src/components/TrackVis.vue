@@ -220,21 +220,17 @@ export default {
             this.svg.selectAll('.braking-line').remove();
             this.svg.selectAll('.legend-braking-line').remove();
 
-            const drawBrakingLine = (driverName, stroke_width, legend_y, color = undefined) => {
-                const telemetry_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName === driverName && d.Brake === 'True')
-                if (telemetry_data.length === 0) {
+            const drawBrakingLine = (driverName, braking_data, stroke_width, legend_y, color, brightness = 1.0) => {
+                if (braking_data.length === 0) {
                     return
-                }
-                if (!color) {
-                    color = colors[telemetry_data[0].TeamId]
                 }
 
                 const grouped_data = []
                 let current_break_section = []
-                telemetry_data.forEach((data, index) => {
+                braking_data.forEach((data, index) => {
                     let this_distance = data.Distance
                     // this logic is false but it doesn't matter cause nobody is braking at the finish
-                    let next_distance = telemetry_data[index + 1] ? telemetry_data[index + 1].Distance : telemetry_data[0].Distance
+                    let next_distance = braking_data[index + 1] ? braking_data[index + 1].Distance : braking_data[0].Distance
 
                     if (next_distance - this_distance < min_break_distance) {
                         current_break_section.push(data)
@@ -264,7 +260,8 @@ export default {
                         .attr("stroke-linejoin", "miter-clip")
                         .attr("stroke-linecap", "butt")
                         .attr("d", brakePath)
-                        .attr("stroke-dasharray", `${l},${l}`);
+                        .attr("stroke-dasharray", `${l},${l}`)
+                        .attr("filter", `brightness(${brightness})`);
                 }
 
                 legendDrivers.append("rect")
@@ -272,7 +269,9 @@ export default {
                     .attr("y", legend_y)
                     .attr("width", 20)
                     .attr("height", 20)
-                    .style("fill", color);
+                    .style("fill", color)
+                    .attr("filter", `brightness(${brightness})`);
+
 
                 const LegendDriversText1 = legendDrivers.append("text")
                     .attr("x", 35)
@@ -283,13 +282,6 @@ export default {
                 LegendDriversText1.text(driverName);
             }
 
-            // const driverColor1 = "#E01A4F"
-            // const driverColor2 = "#53B3CB"
-            // undefined colors means the driver's team color will be selected
-            const driverColor1 = undefined
-            const driverColor2 = undefined
-            // const driverColor2 = "limegreen"
-
             const legendDrivers = this.speedLine.append("g")
                 .attr("class", "legend-braking-line")
                 .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
@@ -298,9 +290,18 @@ export default {
                 .text("Braking Zones")
                 .attr("dy", "-10px")
 
-            drawBrakingLine(this.drivers[0], 25, 0, driverColor1)
+            const driver1_braking_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName === this.drivers[0] && d.Brake === 'True')
+            const driver1_color = colors[driver1_braking_data[0]?.TeamId]
+
+            drawBrakingLine(this.drivers[0], driver1_braking_data, 25, 0, driver1_color)
             if (this.drivers.length == 2) {
-                drawBrakingLine(this.drivers[1], 18, 30, driverColor2)
+                const driver2_braking_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName === this.drivers[1] && d.Brake === 'True')
+                const driver2_color = colors[driver2_braking_data[0]?.TeamId]
+                if (driver1_color === driver2_color) {
+                    drawBrakingLine(this.drivers[1], driver2_braking_data, 18, 30, driver2_color, 0.6)
+                } else {
+                    drawBrakingLine(this.drivers[1], driver2_braking_data, 18, 30, driver2_color)
+                }
             }
         },
 
