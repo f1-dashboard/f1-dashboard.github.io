@@ -21,7 +21,7 @@ const colors = {
     haas: "#b6babd",
 }
 
-// Parse the duration string, e.g. "0 days 00:01:20.643000"
+// Parse a duration string, e.g. "0 days 00:01:20.643000" into a number of seconds
 function parseTimeString(ts) {
     const durationArray = ts.split(" ");
 
@@ -39,6 +39,11 @@ function parseTimeString(ts) {
     }
 }
 
+// Simple linear interpolation
+function lerp(x, p0, p1) {
+    const t = (x - p0[0]) / (p1[0] - p0[0]);
+    return p0[1] + t * (p1[1] - p0[1]);
+}
 
 export default {
     emits: ['DistanceChanged'],
@@ -61,6 +66,7 @@ export default {
     },
     watch: {
         distance_highlight: function (newVal, oldVal) {
+            // Don't listen to distance updates if data hasn't been loaded
             if (!this.loaded) {
                 return
             }
@@ -117,34 +123,37 @@ export default {
                     .attr("transform", `translate(${x},${y})`)
                     .attr("fill", colors[driver.team])
 
-                // const textNode = this.dots.append("text")
-                //     .text(driver.full_name)
-                //     .attr("fill", colors[driver.team]);
+                const textNode = this.dots.append("text")
+                    .text(driver.full_name)
+                    .attr("fill", colors[driver.team]);
 
-                // y_positions.push([y, textNode])
+                y_positions.push([y, textNode])
 
                 this.svg.property("value", driver.full_name).dispatch("input", { bubbles: true });
             }
 
-            // Change y positions so names aren't overlapping
-            const min_dist = 20;
+            // Change text y positions so names aren't overlapping
             for (let i = 0; i < y_positions.length; i++) {
                 let [y, node] = y_positions[i]
-                node.attr("transform", `translate(${xm},${y})`)
-                    .attr("y", 2);
 
                 if (i % 2 === 0) {
-                    node.attr("text-anchor", "start")
-                        .attr("x", 8)
+                    node.attr("text-anchor", "end")
+                        .attr("x", 0)
+                        .attr("transform", `translate(${this.x(this.maxX)},${y})`)
+                        .attr("y", -2)
                 } else {
                     node.attr("text-anchor", "end")
                         .attr("x", -8)
+                        .attr("transform", `translate(${xm},${y})`)
+                        .attr("y", 2);
                 }
             }
         },
 
         get_interpolated_time(driver, dist) {
             const data = this.data[this.qualifying].get(driver)
+
+            // Find first data poitn where data.dist > dist
             let i = 0;
             while (i < data.length && data[i][0] < dist) {
                 i++;
@@ -156,14 +165,14 @@ export default {
             if (i === data.length) {
                 return data[data.length - 1][1];
             }
-            const p0 = data[i - 1];
-            const p1 = data[i];
-            const t = (dist - p0[0]) / (p1[0] - p0[0]);
-            return p0[1] + t * (p1[1] - p0[1]);
+
+            return lerp(dist, data[i - 1], data[i])
         },
 
+        // Set the visible drivers, updating the graph lines
         set_drivers(drivers) {
-            // compute gap between drivers
+
+            // First compute time gap between drivers
             let maxGap = 0.1
             this.relative_data_px = new Map()
             for (let i = 0; i < drivers.length; i++) {
@@ -189,7 +198,7 @@ export default {
             maxGap += 0.2
             this.y.domain([-maxGap, maxGap])
 
-            // convert gap data to pixel space
+            // Convert gap data to pixel space
             for (const driver of this.relative_data_px) {
                 const gapPXdata = this.relative_data_px.get(driver[0]).map(([x, y]) => [this.x(x), this.y(y)])
                 gapPXdata["full_name"] = driver[0]
@@ -197,6 +206,7 @@ export default {
                 this.relative_data_px.set(driver[0], gapPXdata)
             }
 
+            // Update axis & lines
             const t = this.svg.transition().duration(750)
 
             this.gy
@@ -220,8 +230,7 @@ export default {
             this.data_raw = {}
             this.data = {}
             for (const q of ['Q1', 'Q2', 'Q3']) {
-
-                // Load data
+                // Load & parse data
                 this.data_raw[q] = await d3.csv(`../data/${this.circuit}/fastest_laps_${q.toLowerCase()}.csv`, d => {
                     const time = parseTimeString(d.Time).time
 
@@ -325,8 +334,6 @@ export default {
 
             this.svg
                 .on("pointermove", this.pointermoved)
-                // .on("pointerenter", this.showDistanceLine)
-                // .on("pointerleave", this.hideDistanceLine)
                 .on("touchstart", event => event.preventDefault());
 
             this.showDistanceLine()

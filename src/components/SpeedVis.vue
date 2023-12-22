@@ -21,12 +21,6 @@ const colors = {
     haas: "#b6babd",
 }
 
-function linearInterpolate(x, p0, p1) {
-    const t = (x - p0[4]) / (p1[4] - p0[4]);
-    return p0[5] + t * (p1[5] - p0[5]);
-}
-
-
 
 export default {
     emits: ['DistanceChanged'],
@@ -75,26 +69,6 @@ export default {
         this.mounted = true
     },
     methods: {
-        get_interpolated_speed(driver, dist) {
-            // filtered_data is array of [x (pixel space), y (pixel space), full_name, team, dist, speed]
-            const data = this.filtered_data.get(driver)
-
-            // find closest data point < dist
-            let i = 0;
-            while (i < data.length && data[i][4] < dist) {
-                i++;
-            }
-
-            if (i === 0) {
-                return data[0][1];
-            }
-            if (i === data.length) {
-                return data[data.length - 1][1];
-            }
-
-            return linearInterpolate(dist, data[i - 1], data[i])
-        },
-
         // Update the distance line + dots visualization based on x value
         set_distance(dist) {
             let clamped = Math.max(0, Math.min(dist, this.maxX))
