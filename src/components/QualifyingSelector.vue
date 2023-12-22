@@ -11,23 +11,36 @@
 export default {
     emits: ['QualiChanged'],
     mounted() {
+        this.updateLinePosition('Q1');
+        window.addEventListener('resize', this.handleResize);
+
         setTimeout(() => {
-            this.changeQuali('Q1')
+            this.changeQuali('Q1');
         }, 50);
+    },
+    beforeDestroy() {
+        window.removeEventListener('resize', this.handleResize);
     },
     methods: {
         changeQuali(q) {
-            this.$emit('QualiChanged', q)
-
-            // Move the line to the right by changing the transform property
+            this.$emit('QualiChanged', q);
+            this.updateLinePosition(q);
+        },
+        handleResize() {
+            const currentQuali = this.$refs.underline.dataset.currentQuali;
+            this.updateLinePosition(currentQuali);
+        },
+        updateLinePosition(q) {
             const targetSpan = this.$refs[q];
             const movingLine = this.$refs.underline;
+
             if (targetSpan && movingLine) {
                 const targetPosition = targetSpan.offsetLeft;
                 movingLine.style.left = targetPosition + 'px';
+                movingLine.style.transition = 'left 0.2s ease';
+                movingLine.style.display = 'grid';
+                movingLine.dataset.currentQuali = q;
             }
-            movingLine.style.transition = "left 0.2s ease"
-            movingLine.style.display = "grid";
         }
     }
 }
