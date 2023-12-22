@@ -32,16 +32,10 @@ export default {
     emits: ['DistanceChanged'],
     props: {
         distance_highlight: {
-            validator(value) {
-                // check between 0 and max distance
-                return true
-            }
+            default: 0
         },
         drivers: {
-            validator(value) {
-                // check valid driver name
-                return true
-            }
+            default: ["Max Verstappen"]
         },
         relative: {
             default: false
@@ -82,8 +76,10 @@ export default {
     },
     methods: {
         get_interpolated_speed(driver, dist) {
-            // filtered data is array of [x (pixel space), y (pixel space), full_name, team, dist, speed]
+            // filtered_data is array of [x (pixel space), y (pixel space), full_name, team, dist, speed]
             const data = this.filtered_data.get(driver)
+
+            // find closest data point < dist
             let i = 0;
             while (i < data.length && data[i][4] < dist) {
                 i++;
@@ -99,26 +95,22 @@ export default {
             return linearInterpolate(dist, data[i - 1], data[i])
         },
 
-        // Update the line + dots visualization based on x value
-        set_distance(dist, pixel_space = false) {
+        // Update the distance line + dots visualization based on x value
+        set_distance(dist) {
             let clamped = Math.max(0, Math.min(dist, this.maxX))
-            let xm;
-            if (!pixel_space) {
-                xm = this.x(clamped)
-            } else {
-                xm = clamped
-            }
+            let xm = this.x(clamped);
 
-            // Change line
+            // Move line
             this.distance_line
                 .attr('x1', xm)
                 .attr('x2', xm)
 
-            // Change dots
+            // Move dots
             const horizontal_distance = ([x, y]) => Math.abs(x - xm)
             this.dots.selectAll("circle").remove()
             this.dots.selectAll("text").remove()
 
+            // Text
             let y_positions = []
             for (const [driver, data] of this.filtered_data.entries()) {
                 const [x, y, full_name, team] = d3.least(data, horizontal_distance);
@@ -136,8 +128,7 @@ export default {
                 this.svg.property("value", full_name).dispatch("input", { bubbles: true });
             }
 
-            // Change y positions so names aren't overlapping
-            const min_dist = 20;
+            // Change x and y positions of text so names aren't overlapping
             for (let i = 0; i < y_positions.length; i++) {
                 let [y, node] = y_positions[i]
                 node.attr("transform", `translate(${xm},${y})`)
@@ -153,6 +144,7 @@ export default {
             }
         },
 
+        // Set the visible drivers, updating the graph lines
         set_drivers(drivers) {
             this.filtered_data = new Map();
             for (const driver_data of this.pixel_data[this.qualifying].values()) {
@@ -228,10 +220,10 @@ export default {
 
             this.pixel_data = {}
             for (const q of ['Q1', 'Q2', 'Q3']) {
-                // compute poitns in pixel space [x, y, z] where z is the driver 
+                // Compute points in pixel space, adding useful additional data
                 const pxPoints = this.data_raw[q].map(d => [this.x(d.dist), this.y(d.speed), d.full_name, d.team, d.dist, d.speed])
 
-                // create map of driver name -> track points
+                // Create map of driver name -> track points
                 this.pixel_data[q] = d3.rollup(pxPoints, v => Object.assign(v, { full_name: v[0][2], team: v[0][3] }), d => d[2])
             }
 
@@ -279,8 +271,6 @@ export default {
 
             this.svg
                 .on("pointermove", this.pointermoved)
-                // .on("pointerenter", this.showDistanceLine)
-                // .on("pointerleave", this.hideDistanceLine)
                 .on("touchstart", event => event.preventDefault());
 
             this.showDistanceLine();
@@ -291,9 +281,10 @@ export default {
         // Update dots
         pointermoved(event) {
             const [xm, ym] = d3.pointer(event);
-            this.$emit('DistanceChanged', this.x.invert(xm))
+            const dist = this.x.invert(xm)
+            this.$emit('DistanceChanged', dist)
 
-            this.set_distance(xm, true)
+            this.set_distance(dist)
         },
 
         showDistanceLine() {
