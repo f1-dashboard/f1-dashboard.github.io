@@ -83,7 +83,6 @@ export default {
                 relativeTo = drivers[0].full_name;
             }
 
-            // Ensure other components are loaded before emitting driver event
             let setDrivers = [];
             if (this.setDrivers != undefined && this.setDrivers.length == 2) {
                 setDrivers = [relativeTo, this.setDrivers[1]];
@@ -91,6 +90,7 @@ export default {
                 setDrivers = [relativeTo];
             }
 
+            // Ensure other components are loaded before emitting driver event
             if (defer) {
                 setTimeout(() => this.$emit('EmitDriver', setDrivers), 100);
             } else {

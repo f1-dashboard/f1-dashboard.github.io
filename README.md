@@ -1,25 +1,12 @@
-# f1-dashboard
+# F1 Dashboard
 
-This template should help get you started developing with Vue 3 in Vite.
+## Report Abstract 
 
-## Recommended IDE Setup
+We introduce a specialized data visualization platform for Formula 1's 2023 qualifying sessions. It simplifies complex race data into clear visuals for teams and passionate fans. The platform focuses on driver performance using graphs for driver speeds and braking points around the track. Evaluation shows the platform effectively exposes performance gaps during qualifying laps, emphasizing speed changes and braking patterns. However, there are limitations in exploring other factors affecting speed differences, like weather conditions, tire specifics and racing lines.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+## Hosted Version
 
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin) to make the TypeScript language service aware of `.vue` types.
-
-If the standalone TypeScript plugin doesn't feel fast enough to you, Volar has also implemented a [Take Over Mode](https://github.com/johnsoncodehk/volar/discussions/471#discussioncomment-1361669) that is more performant. You can enable it by the following steps:
-
-1. Disable the built-in TypeScript Extension
-    1) Run `Extensions: Show Built-in Extensions` from VSCode's command palette
-    2) Find `TypeScript and JavaScript Language Features`, right click and select `Disable (Workspace)`
-2. Reload the VSCode window by running `Developer: Reload Window` from the command palette.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+[https://f1-dashboard.github.io](https://f1-dashboard.github.io)
 
 ## Project Setup
 
@@ -39,8 +26,3 @@ npm run dev
 npm run build
 ```
 
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
