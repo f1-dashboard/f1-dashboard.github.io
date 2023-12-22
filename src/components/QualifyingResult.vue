@@ -50,7 +50,7 @@ export default {
     props: {
         qualifying: {
             validator(value) {
-                return qualis.includes(value)
+                return qualis.includes(value);
             }
         },
         circuit: {
@@ -62,49 +62,49 @@ export default {
     },
     watch: {
         qualifying: function (newVal, oldVal) {
-            this.update(this.setDrivers[0])
+            this.update(this.setDrivers[0]);
         },
         circuit: async function (newVal, oldVal) {
-            await this.init()
-            this.update(null)
+            await this.init();
+            this.update(null);
         },
     },
     async mounted() {
-        await this.init()
-        this.update(null, true)
+        await this.init();
+        this.update(null, true);
     },
     methods: {
         update(relativeTo, defer = false) {
-            const drivers = this.getDriverData(this.qualifying, relativeTo)
-            const format = d3.format("+.3")
-            const eps = 0.0000001
+            const drivers = this.getDriverData(this.qualifying, relativeTo);
+            const format = d3.format("+.3");
+            const eps = 0.0000001;
 
             if (!relativeTo) {
-                relativeTo = drivers[0].full_name
+                relativeTo = drivers[0].full_name;
             }
 
-            // ensure other components are loaded before emitting driver event
-            let setDrivers = []
+            // Ensure other components are loaded before emitting driver event
+            let setDrivers = [];
             if (this.setDrivers != undefined && this.setDrivers.length == 2) {
-                setDrivers = [relativeTo, this.setDrivers[1]]
+                setDrivers = [relativeTo, this.setDrivers[1]];
             } else {
-                setDrivers = [relativeTo]
+                setDrivers = [relativeTo];
             }
 
             if (defer) {
-                setTimeout(() => this.$emit('EmitDriver', setDrivers), 100)
+                setTimeout(() => this.$emit('EmitDriver', setDrivers), 100);
             } else {
-                this.$emit('EmitDriver', setDrivers)
+                this.$emit('EmitDriver', setDrivers);
             }
 
             // Update axis domains
-            this.x.domain(d3.extent(drivers, d => d.delta))
-            this.y.domain(drivers.map(d => d.full_name))
+            this.x.domain(d3.extent(drivers, d => d.delta));
+            this.y.domain(drivers.map(d => d.full_name));
 
-            const t = this.svg.transition().duration(750)
+            const t = this.svg.transition().duration(750);
 
             let bars = this.svg.selectAll("rect")
-                .data(drivers)
+                .data(drivers);
             bars.enter()
                 .append("rect")
                 .on("click", (d, i) => this.update(i.full_name))
@@ -116,10 +116,10 @@ export default {
                 .attr("width", d => Math.abs(this.x(d.delta) - this.x(0)))
                 .attr("height", this.y.bandwidth())
 
-            bars.exit().remove()
+            bars.exit().remove();
 
             let timing_labels = this.svg.selectAll(".delta")
-                .data(drivers)
+                .data(drivers);
             timing_labels.enter()
                 .append("text")
                 .merge(timing_labels)
@@ -142,14 +142,14 @@ export default {
                 .call(text => text.filter(d => Math.abs(this.x(d.delta) - this.x(0)) < 40) // short bars
                     .attr("dx", d => Math.sign(d.delta + eps) * 4)
                     .attr("fill", "black")
-                    .attr("text-anchor", d => d.delta < 0 ? "end" : "start"))
+                    .attr("text-anchor", d => d.delta < 0 ? "end" : "start"));
 
 
-            timing_labels.exit().remove()
+            timing_labels.exit().remove();
 
-            // transitions
+            // Transitions
             this.gx.transition(t)
-                .call(d3.axisBottom(this.x))
+                .call(d3.axisBottom(this.x));
             this.gy.transition(t)
                 .attr("transform", `translate(${this.x(0)},0)`)
                 .call(d3.axisLeft(this.y).tickSize(0))
@@ -157,11 +157,7 @@ export default {
                     .attr("text-anchor", "start")
                     .attr("x", 6))
                 .call(g => g.selectAll(".tick text").filter((d, i) => drivers[i]?.delta >= 0)
-                    .attr("text-anchor", "end"))
-            // .call(g => g.selectAll(".tick text").filter((d, i) => setDrivers.includes(drivers[i]?.full_name))
-            //     .attr("color", "red"))
-            // .call(g => g.selectAll(".tick text").filter((d, i) => !setDrivers.includes(drivers[i]?.full_name))
-            //     .attr("color", "black"))
+                    .attr("text-anchor", "end"));
         },
 
         async init() {
@@ -176,21 +172,17 @@ export default {
                 };
 
                 for (let q of qualis) {
-                    // Parse the duration string, e.g. "0 days 00:01:20.643000"
-
                     try {
-                        driver[q] = parseTimeString(d[q])
+                        driver[q] = parseTimeString(d[q]);
                     } catch {
                         continue;
                     }
-
                 }
 
-                return driver
+                return driver;
             });
 
             // Declare the chart dimensions and margins.
-            const barHeight = 25;
             const marginTop = 20;
             const marginRight = 100;
             const marginBottom = 30;
@@ -215,10 +207,10 @@ export default {
                 .attr("style", "max-width: 100%; height: auto; font: 12px sans-serif;");
 
             // Create the bar for each driver
-            this.bars = this.svg.append("g")
+            this.bars = this.svg.append("g");
 
             // Add the timing label 00:00.000
-            this.timing_labels = this.svg.append("g")
+            this.timing_labels = this.svg.append("g");
 
             // Add the x-axis.
             this.gx = this.svg.append("g")
@@ -239,21 +231,23 @@ export default {
                 .text("time difference (s)");
 
             // Append the SVG element. 
-            qual.append(this.svg.node())
+            qual.append(this.svg.node());
 
             this.drivers = await data;
         },
 
+        // Get the correct drivers for the session and return them and their lap times
         getDriverData(quali, relativeTo) {
-            const driversInQuali = d3.filter(this.drivers, d => d[quali])
-
+            const driversInQuali = d3.filter(this.drivers, d => d[quali]);
             let relativeTime;
+
             if (relativeTo && d3.filter(driversInQuali, d => d.full_name === relativeTo).length > 0) {
-                relativeTime = d3.filter(driversInQuali, d => d.full_name === relativeTo)[0][quali].lap_time
+                relativeTime = d3.filter(driversInQuali, d => d.full_name === relativeTo)[0][quali].lap_time;
             } else {
-                relativeTime = d3.min(driversInQuali, d => d[quali].lap_time)
+                relativeTime = d3.min(driversInQuali, d => d[quali].lap_time);
             }
-            driversInQuali.forEach(d => d.delta = (d[quali].lap_time - relativeTime))
+
+            driversInQuali.forEach(d => d.delta = (d[quali].lap_time - relativeTime));
             return d3.sort(driversInQuali, d => d.delta)
         }
     }
