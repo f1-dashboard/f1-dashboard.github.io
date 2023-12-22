@@ -18,8 +18,8 @@ export default {
       selected: null,
     };
   },
-  mounted() {
-    this.loadEvents();
+  async mounted() {
+    await this.loadEvents();
   },
   methods: {
     async loadEvents() {
@@ -36,7 +36,6 @@ export default {
       }
     },
     emitRoundNumber() {
-      // Emit the RoundNumber of the selected event
       this.$emit('round-selected', this.selected);
     },
   },
@@ -49,7 +48,6 @@ export default {
   font-weight: bold;
   font-family: formula1;
   font-size: xx-large;
-  /* Align text for the select box */
 }
 
 .dropdown select {
