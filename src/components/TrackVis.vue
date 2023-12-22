@@ -7,16 +7,6 @@
     </div>
 </template>
 
-<style scoped>
-/* #trackvis {
-    background-color: aliceblue;
-    border-radius: 5px;
-    padding: 5px 0;
-    border-style: solid;
-    border-color: rgba(0, 0, 0, 0.5);
-} */
-</style>
-
 <script>
 import * as d3 from "d3";
 
@@ -37,7 +27,7 @@ export default {
     props: ['drivers', 'circuit', 'distance_highlight', 'qualifying'],
 
     watch: {
-        drivers: function (newVal, oldVal) {
+        drivers: function () {
             if (!this.loaded) {
                 return
             }
@@ -47,16 +37,16 @@ export default {
                 this.drawBrakingLines()
             }
         },
-        circuit: async function (newVal, oldVal) {
+        circuit: async function () {
             this.loaded = false
             await this.init();
             this.visualizeTrack()
             this.loaded = true
         },
-        distance_highlight: function (newVal, oldVal) {
+        distance_highlight: function (newVal) {
             this.updateDistancePoint(newVal)
         },
-        qualifying: function (newVal, oldVal) {
+        qualifying: function () {
             if (!this.loaded) {
                 return
             }
@@ -74,21 +64,14 @@ export default {
         this.loaded = true
     },
     methods: {
+        // given the position of the mouse and the closest postion on the track,
+        // returns the square of the distance between these two points.
         calculateDistance(point1, point2) {
             const dx = point1.X - point2.X;
             const dy = point1.Y - point2.Y;
-            // return Math.sqrt(dx * dx + dy * dy);
             return dx * dx + dy * dy
         },
-        calculateDx(startX, startY, endX, endY) {
-            const dx = (endX - startX) / (Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2))
-            return dx
-        },
-        calculateDy(startX, startY, endX, endY) {
-            const dy = (endY - startY) / (Math.sqrt((endX - startX) ** 2 + (endY - startY) ** 2))
-            return dy
-        },
-
+        // given a distance, updates the point on the track to the closest point for the given distance.
         updateDistancePoint(distance) {
             this.circle.selectAll().remove()
 
@@ -102,26 +85,17 @@ export default {
                 .attr("cy", d => this.y(d.Y))
                 .attr("r", 5);
         },
-
+        // given a point on the track, emits the distance so the same distance can be used in other graphs.
         distanceEvent(point) {
             const closest = d3.least(this.circuit_data, d => this.calculateDistance(point, d))
             this.$emit('EmitDistance', closest.Distance)
         },
-
+        // draws the speed on the the track and a legend for the colors for the speed.
         visualizeTrack() {
             const telemetry_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName == this.drivers[0])
             const [minSpeed, maxSpeed] = d3.extent(telemetry_data, d => +d.Speed)
 
-            // define color range
-            // var color = d3.scaleLinear()
-            //     .domain(speed_domain)
-            //     .range(["red", "#eac0a0"]);
-
-
-            // https://d3js.org/d3-scale-chromatic/sequential
-            // const colorMap = d3.interpolateInferno
             const colorMap = d3.interpolateRdPu
-            // const colorMap = d3.interpolateReds
             const color = d3.scaleSequential((speed) => colorMap((speed - minSpeed) / (maxSpeed - minSpeed)));
 
             this.speedLine.selectAll('line').remove()
@@ -165,12 +139,11 @@ export default {
                     .attr("stop-color", colorMap(i / 100));
             }
 
-
             const legendSpeed = this.speedLine.append("g")
                 .attr("class", "legend")
                 .attr("transform", `translate(${+this.svg.attr("width") - legendWidth - 75},${+this.svg.attr("height") - 50})`)
 
-            // // Legend border
+            // Legend border
             const borderWidth = 2
             legendSpeed.append("rect")
                 .attr("x", -borderWidth)
@@ -212,7 +185,7 @@ export default {
                 .text(`${Math.round(maxSpeed)}`);
 
         },
-
+        // draws the braking lines and a legend for these braking lines.
         drawBrakingLines() {
             // Minimum distance between two braking poitns to be considered different lines
             const min_break_distance = 30
@@ -281,7 +254,7 @@ export default {
 
                 LegendDriversText1.text(driverName);
             }
-
+            // create legend
             const legendDrivers = this.speedLine.append("g")
                 .attr("class", "legend-braking-line")
                 .attr("transform", `translate(${0 + 75},${+this.svg.attr("height") - 50})`)
@@ -294,9 +267,11 @@ export default {
             const driver1_color = colors[driver1_braking_data[0]?.TeamId]
 
             drawBrakingLine(this.drivers[0], driver1_braking_data, 25, 0, driver1_color)
+            // if two drivers are selected, draw an extra braking line.
             if (this.drivers.length == 2) {
                 const driver2_braking_data = d3.filter(this.driver_data[this.qualifying], d => d.FullName === this.drivers[1] && d.Brake === 'True')
                 const driver2_color = colors[driver2_braking_data[0]?.TeamId]
+                // if two drivers are from the same team, use a different team color.
                 if (driver1_color === driver2_color) {
                     drawBrakingLine(this.drivers[1], driver2_braking_data, 18, 30, driver2_color, 0.6)
                 } else {
@@ -304,7 +279,7 @@ export default {
                 }
             }
         },
-
+        // on init the track is drawn and the data is loaded.
         async init() {
             // Clear existing SVG element (if any)
             d3.select('#trackvis').selectAll('svg').remove();
